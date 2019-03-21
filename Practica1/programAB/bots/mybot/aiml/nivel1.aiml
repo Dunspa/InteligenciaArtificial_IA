@@ -65,7 +65,7 @@
 <!-- Incluir un nuevo capitulo en una temporada de una serie -->
 <category>
    <pattern>
-      ^ [anad+ inclu+ introduc+ pon+ met+ mete+] un (nuevo) capitulo (nuevo) [en de a] la temporada <set>number</set> [de en para] (la serie) <set>totalseries</set>
+      ^ [anad+ inclu+ introduc+ pon+ met+ mete+] un (nuevo) capitulo (nuevo) [en de a] la (nueva) temporada <set>number</set> [de en para] (la serie) <set>totalseries</set>
    </pattern>
    <template>
       <!-- Operaciones para verificar que existe lo que se pide -->
@@ -73,9 +73,23 @@
          <set name="serie"><star index="3"/></set>
          <set name="temporada"><star index="2"/></set>
          <set name="resto"><map><name><star index="3"/></name>temporada<star index="2"/></map></set>
-         <set name="topic">titcap</set>
+         <set var="cond"><map><name><star index="3"/></name>temporada<star index="2"/></map></set>
       </think>
-      Vale vamos a meter un nuevo capítulo en la temporada <get name="temporada"/> de <get name="serie"/>, dime el título del capítulo.
+      <condition var="cond">
+         <!-- Incluir el primer capitulo de una nueva temporada en una serie -->
+         <li value="unknown">
+            <think>
+               <set name="topic">crearnuevatemp</set>
+            </think>
+            Se ha creado la nueva temporada correctamente. Dime el título del capítulo.
+         </li>
+         <li>
+            <think>
+               <set name="topic">titcap</set>
+            </think>
+            Vale vamos a meter un nuevo capítulo en la temporada <get name="temporada"/> de <get name="serie"/>, dime el título del capítulo.
+         </li>
+      </condition>
    </template>
 </category>
 
@@ -89,6 +103,80 @@
       </srai>
    </template>
 </category>
+
+<topic name="crearnuevatemp">
+   <category>
+      <pattern>
+         *
+      </pattern>
+      <template>
+         <think>
+            <set name="topic">durcapnueva</set>
+            <set name="titulo"><star/></set>
+         </think>
+         Vale, dime la duración del capítulo.
+      </template>
+   </category>
+</topic>
+
+<topic name="durcapnueva">
+   <category>
+      <pattern>
+         <set>number</set>
+      </pattern>
+      <template>
+         <think>
+            <set name="topic">mascaps</set>
+         </think>
+         <addtomap>
+            <name><get name="serie"/></name>
+            <key>temporada<get name="temporada"/></key>
+            <value><srai>CODE <get name="titulo"/></srai>@<star/></value>
+         </addtomap>
+         Ya tienes creada la nueva temporada con su primer capítulo. ¿Quieres más capítulos?
+      </template>
+   </category>
+
+   <category>
+      <pattern>
+         *
+      </pattern>
+      <template>
+         Eh, eso es un número, no me engañes. Dime la duración del capítulo en minutos. Osea, me tienes que dar un número, no es tan difícil.
+      </template>
+   </category>
+</topic>
+
+<topic name="mascaps">
+   <category>
+      <pattern>
+         *
+      </pattern>
+      <template>
+         <think>
+            <set var="cond"><star/></set>
+         </think>
+         <condition var="cond">
+            <li value="si">
+               <think>
+                  <set name="topic">titcap</set>
+                  <set name="resto"><map><name><get name="serie"/></name>temporada<get name="temporada"/></map></set>
+               </think>
+               Pues dime el título del nuevo capítulo.
+            </li>
+            <li value="no">
+               <think>
+                  <set name="topic">unknown</set>
+               </think>
+               Pues no añadimos más capítulos. Si cambias de opinión o quieres cualquier cosa, pídemelo.
+            </li>
+            <li>
+               Habla bien que no se te entiende, ¿quieres añadir más capítulos si o no?
+            </li>
+         </condition>
+      </template>
+   </category>
+</topic>
 
 <topic name="titcap">
    <!-- Pide el nombre de un capitulo -->
@@ -114,58 +202,34 @@
       </pattern>
       <template>
          <think>
+            <set name="nuevocap"><srai>CODE <get name="titulo"/></srai></set>
             <set name="duracion"><star/></set>
-            <set name="topic">unknown</set>
+            <set name="topic">mascaps</set>
          </think>
          <!-- Pasar toda la informacion a la estructura -->
          <modifymap>
             <name><get name="serie"/></name>
             <key>temporada<get name="temporada"/></key>
-            <value><get name="resto"/>@<get name="titulo"/>@<get name="duracion"/></value>
+            <value><get name="resto"/>@<get name="nuevocap"/>@<get name="duracion"/></value>
          </modifymap>
-         Hala, ya tienes disponible este nuevo capítulo.
+         Hala, ya tienes disponible este nuevo capítulo. ¿Quieres meter más capítulos?
+      </template>
+   </category>
+
+   <category>
+      <pattern>
+         *
+      </pattern>
+      <template>
+         Eh, eso es un número, no me engañes. Dime la duración del capítulo en minutos. Osea, me tienes que dar un número, no es tan difícil.
       </template>
    </category>
 </topic>
 
-<!-- Incluir el primer capitulo de una nueva temporada en una serie -->
-<category>
-   <pattern>
-      ^ [anad+ inclu+ introduc+ pon+ mete+ cre+] un+ (nuev+) (capitulo) ([en de a]) (una) nuev+ temporada [en de para] (la serie) * (temporada) ^
-   </pattern>
-   <template>
-      <think>
-         <set name="serie"><star index="2"/></set>
-         <set var="cond"><star index="3"/></set>
-      </think>
-      <condition var="cond">
-         <li value="unknown">
-            <!-- HACER IMPORTANTE TODO: ADIVINAR TEMPORADA QUE SE TIENE QUE CREAR (SI TIENE DOS TEMPORADAS, AÑADIR LA 3) -->
-            AQUI HACE COSAS, NO SE
-         </li>
-         <li>
-            <think>
-               <set name="numerotemporada"><star index="3"/></set>
-            </think>
-         </li>
-      </condition>
-      <addtomap>
-         <name><get name="serie"/></name>
-         <key>temporada<get name="numerotemporada"/></key>
-         <value></value>
-      </addtomap>
-      Venga, creamos la temporada <get name="numerotemporada"/> de <get name="serie"/>.
-      <!-- TODO: PETA AQUI -->
-      <srai>
-         mete un nuevo capitulo para la serie <get name="serie"/> de la temporada <get name="numerotemporada"/>
-      </srai>
-   </template>
-</category>
-
 <!-- Incluir una nueva serie en una de las plataformas -->
 <category>
    <pattern>
-      ^ crear ^ (nueva) serie
+      ^ crea+ ^ (nueva) serie
    </pattern>
    <template>
       <think>
@@ -178,7 +242,7 @@
 <topic name="nombrenuevaserie">
    <category>
       <pattern>
-         *
+         <set>totalseries</set>
       </pattern>
       <template>
          <srai>
@@ -186,11 +250,22 @@
          </srai>
       </template>
    </category>
+
+   <category>
+      <pattern>
+         *
+      </pattern>
+      <template>
+         <srai>
+            de que va la serie <star/>
+         </srai>
+      </template>
+   </category>
 </topic>
 
 <category>
    <pattern>
-      ^ [anad+ incluy+ introdu+ pon+ mete+ met+ crea+] [la una] (nueva) serie ^ llam+ *
+      ^ [anad+ incluy+ introdu+ pon+ mete+ met+ cre+ crea+] [la una] (nueva) serie ^ llam+ *
    </pattern>
    <template>
       <think>
@@ -198,6 +273,30 @@
          <set name="topic">plat</set>
       </think>
       Venga, pero me vas a tener que dar los datos sobre la serie <get name="titulo"/> que yo no tengo ni idea. Dime qué plataforma la ofrece.
+   </template>
+</category>
+
+<!-- Regla que concatena una lista de palabras mediante un "@" (de utilidades.aiml) -->
+<category>
+   <pattern>
+      codealt *
+   </pattern>
+   <template>
+      <think>
+         <set var="tmp"><star/></set>
+         <set var="solucion"><first><get var="tmp"/></first></set>
+         <set var="tmp"><rest><get var="tmp"/></rest></set>
+         <condition var="tmp">
+         <li value="NIL">
+         </li>
+         <li>
+            <set var="solucion"><get var="solucion"/>@<first><get var="tmp"/></first></set>
+            <set var="tmp"><rest><get var="tmp"/></rest></set>
+            <loop/>
+         </li>
+         </condition>
+      </think>
+      <get var="solucion"/>
    </template>
 </category>
 
@@ -296,7 +395,7 @@
          <addtomap>
             <name><get name="titulo"/></name>
             <key>genero</key>
-            <value><get name="genero"/></value>
+            <value><srai>codealt <get name="genero"/></srai></value>
          </addtomap>
          Cuéntame de qué va la serie.
       </template>
@@ -356,30 +455,6 @@
       </template>
    </category>
 </topic>
-
-<!-- Regla que concatena una lista de palabras mediante un "@" (de utilidades.aiml) -->
-<category>
-   <pattern>
-      codealt *
-   </pattern>
-   <template>
-      <think>
-         <set var="tmp"><star/></set>
-         <set var="solucion"><first><get var="tmp"/></first></set>
-         <set var="tmp"><rest><get var="tmp"/></rest></set>
-         <condition var="tmp">
-         <li value="NIL">
-         </li>
-         <li>
-            <set var="solucion"><get var="solucion"/>@<first><get var="tmp"/></first></set>
-            <set var="tmp"><rest><get var="tmp"/></rest></set>
-            <loop/>
-         </li>
-         </condition>
-      </think>
-      <get var="solucion"/>
-   </template>
-</category>
 
 <topic name="idio">
    <category>
@@ -507,7 +582,7 @@
                   <set name="topic">unknown</set>
                </think>
                <srai>
-                  quiero poner un nuevo capitulo de una nueva temporada para la serie <get name="titulo"/> temporada 1
+                  pon un nuevo capitulo en la nueva temporada 1 de la serie <get name="titulo"/>
                </srai>
             </li>
             <li value="no">
@@ -537,122 +612,5 @@
       La plataforma <star index="2"/> ha sido incluída.
    </template>
 </category>
-
-<!-- Cambiar la información de una serie
-<category>
-   <pattern>
-   </pattern>
-   <template>
-   </template>
-</category>
--->
-
-<!-- Modificación de CODE de utilidades.aiml para que en vez de _ ponga @ -->
-
-<!-- Modificación de DECODE de utilidades.aiml para que en vez de quitar _ quite el @ -->
-
-<!--
-<category>
-   <pattern>
-      ^ [anade mete introduce pon] (la serie) *
-   </pattern>
-   <template>
-      Venga, vamos a <set name="topic">poner</set> la serie <star index="2"/>. Contestame a todo lo que te voy a preguntar. Dime qué plataforma la ofrece.
-   </template>
-</category>
-
-<topic name="poner">
-   <category>
-      <pattern>
-
-      </pattern>
-      <template>
-         ¿A qué genero pertenece?
-      </template>
-   </category>
-
-   <category>
-      <pattern>
-      </pattern>
-      <template>
-         ¿De qué va la serie?
-      </template>
-   </category>
-
-   <category>
-      <pattern>
-      </pattern>
-      <template>
-         ¿En qué idiomas está?
-      </template>
-   </category>
-
-   <category>
-      <pattern>
-      </pattern>
-      <template>
-         ¿Qué subtitulos ofrece?
-      </template>
-   </category>
-
-   <category>
-      <pattern>
-      </pattern>
-      <template>
-         ¿Sabes la web donde está la serie?
-      </template>
-   </category>
-
-   <category>
-      <pattern>
-      </pattern>
-      <template>
-         Ea, pues ya está lo básico. ¿Quieres añadir capitulos?
-      </template>
-   </category>
-
-   <category>
-      <pattern>
-         ^ No ^
-      </pattern>
-      <template>
-         Pues ya está, si quieres otra cosa pídemela. Total, no tengo nada más que hacer.
-      </template>
-   </category>
-</topic>
-
-<category>
-   <pattern>
-      la capital de * es *
-   </pattern>
-   <template>
-      <think>
-         <set var="cap">
-            <srai>
-               cual es la capital de <star/>
-            </srai>
-         </set>
-      </think>
-      <condition var="cap">
-         <li value="no lo se">
-            <learn>
-               <category>
-                  <pattern>
-                     cual es la capital de <eval><star/></eval>
-                  </pattern>
-                  <template>
-                     La capital de <eval><star/></eval> es <eval><star index="2"/></eval>
-                  </template>
-               </category>
-            </learn>
-            Recordaré que la capital de <star/> es <star index="2"/>.
-         </li>
-         <li>
-            Ya lo sabía
-         </li>
-      </condition>
-   </template>
-</category>
--->
 
 </aiml>
