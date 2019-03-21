@@ -357,7 +357,7 @@
    </category>
 </topic>
 
-<!-- TODO: Regla que concatena una lista de palabras mediante un "@" (de utilidades.aiml) -->
+<!-- Regla que concatena una lista de palabras mediante un "@" (de utilidades.aiml) -->
 <category>
    <pattern>
       codealt *
@@ -371,7 +371,7 @@
          <li value="NIL">
          </li>
          <li>
-            <set var="solucion"><get var="solucion"/>_<first><get var="tmp"/></first></set>
+            <set var="solucion"><get var="solucion"/>@<first><get var="tmp"/></first></set>
             <set var="tmp"><rest><get var="tmp"/></rest></set>
             <loop/>
          </li>
@@ -394,7 +394,7 @@
          <addtomap>
             <name><get name="titulo"/></name>
             <key>idiomas</key>
-            <value><get name="idiomas"/></value>
+            <value><srai>codealt <get name="idiomas"/></srai></value>
          </addtomap>
          Bien, ¿qué idiomas de subtítulos tiene?
       </template>
@@ -411,7 +411,7 @@
          <addtomap>
             <name><get name="titulo"/></name>
             <key>idiomas</key>
-            <value><get name="idiomas"/></value>
+            <value><srai>codealt <get name="idiomas"/></srai></value>
          </addtomap>
          No pasa nada, no le ponemos idiomas. ¿Sabes qué idiomas de subtítulos tiene?
       </template>

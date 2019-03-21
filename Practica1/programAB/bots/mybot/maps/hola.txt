@@ -1,0 +1,4 @@
+genero:asd
+descripcion:pues_va_de_que_tengo_sueno
+idiomas:espanol@ingles
+subtitulos:espanol ingles
