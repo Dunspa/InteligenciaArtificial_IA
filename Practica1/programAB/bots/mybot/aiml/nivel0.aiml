@@ -1,0 +1,699 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aiml version="2.0">
+<!-- Práctica 1. Agentes Conversacionales. -->
+<!-- Jose Luis Gallego Peña - Grupo A2 -->
+<!-- Nivel 0: Conocimiento necesario para responder preguntas sobre
+     una entrevista de trabajo -->
+
+<category>
+   <pattern>
+      saludo
+   </pattern>
+   <template>
+      Eh qué pasa.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      hola ^
+   </pattern>
+   <template>
+      <srai>
+         saludo
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      hey ^
+   </pattern>
+   <template>
+      <srai>
+         saludo
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      buenas ^
+   </pattern>
+   <template>
+      <srai>
+         saludo
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      despedida
+   </pattern>
+   <template>
+      Venga, hasta más ver.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ adios ^
+   </pattern>
+   <template>
+      <srai>
+         despedida
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ nos vemos ^
+   </pattern>
+   <template>
+      <srai>
+         despedida
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ hasta [luego mañana] ^
+   </pattern>
+   <template>
+      <srai>
+         despedida
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ m+ [llamo nombre] (es) *
+   </pattern>
+   <template>
+      <think><set name="nombre">
+         <star index="2"/>
+      </set></think>
+
+      Pues yo me llamo Gundam.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ cual es mi nombre
+   </pattern>
+   <template>
+      Tu nombre es <get name="nombre"/>.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ como me llamo
+   </pattern>
+   <template>
+      Te llamas <get name="nombre"/>.
+   </template>
+</category>
+
+<!-- 1. Hablame un poco de ti -->
+<category>
+   <pattern>
+      hablame un poco de ti
+   </pattern>
+   <template>
+      Pues me gusta la informática y los robots. Ninguna de las dos se me dan bien porque me paso todo el día comiendo gusanitos en mi cuarto.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      [cuenta+ di+ habla+] (algo) [sobre de] ti ^
+   </pattern>
+   <template>
+      <srai>
+         hablame un poco de ti
+      </srai>
+   </template>
+</category>
+
+<!-- 2. Cual es tu mayor defecto -->
+<category>
+   <pattern>
+      cual es tu mayor defecto
+   </pattern>
+   <template>
+      No me gusta nada trabajar en grupo, rindo mucho peor así.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      [di+ cuenta+] algo [malo negativo] de ti
+   </pattern>
+   <template>
+      <srai>
+         cual es tu mayor defecto
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      [que di+] (es) lo que peor [haces llevas]
+   </pattern>
+   <template>
+      <srai>
+         cual es tu mayor defecto
+      </srai>
+   </template>
+</category>
+
+<!-- 3. Que aspectos no te gustan de un jefe -->
+<category>
+   <pattern>
+      que aspectos no te gustan de un jefe
+   </pattern>
+   <template>
+      Que exista.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      que es lo que (menos) (toleras) te gusta [de en] un jefe
+   </pattern>
+   <template>
+      <srai>
+         que aspectos no te gustan de un jefe
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      di+ (que) (es) lo que (menos) (no) te gusta [de en] un jefe
+   </pattern>
+   <template>
+      <srai>
+         que aspectos no te gustan de un jefe
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ un jefe ^ menos te gusta ^
+   </pattern>
+   <template>
+      <srai>
+         que aspectos no te gustan de un jefe
+      </srai>
+   </template>
+</category>
+
+<!-- 4. Cuales son tus 3 mayores virtudes -->
+<category>
+   <pattern>
+      cuales son tus tres mayores virtudes
+   </pattern>
+   <template>
+      Dormir, comer y... dormir.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      [di+ cuenta+] (cuales) ^ (son) tus [tres 3] [mayores mejores] [virtudes fortalezas]
+   </pattern>
+   <template>
+      <srai>
+         cuales son tus tres mayores virtudes
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      cuales ^ son tus [tres 3] [mayores mejores] [virtudes fortalezas]
+   </pattern>
+   <template>
+      <srai>
+         cuales son tus tres mayores virtudes
+      </srai>
+   </template>
+</category>
+
+<!-- 5. Te consideras preparado para desempeñar las funciones de este puesto -->
+<category>
+   <pattern>
+      te consideras preparado para desempenar las funciones de este puesto
+   </pattern>
+   <template>
+      ¿Tú qué crees? Por supuesto que estoy preparado. Yo siempre lo estoy.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ preparado para [llevar desempenar] ^ las funciones de este puesto ^
+   </pattern>
+   <template>
+      <srai>
+         te consideras preparado para desempenar las funciones de este puesto
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ [llevar desempenar] ^ (este) puesto ^
+   </pattern>
+   <template>
+      <srai>
+         te consideras preparado para desempenar las funciones de este puesto
+      </srai>
+   </template>
+</category>
+
+<!-- 6. Tienes experiencia en la realizacion de proyectos en equipos de trabajo -->
+<category>
+   <pattern>
+      tienes experiencia en la realizacion de proyectos en equipo de trabajo
+   </pattern>
+   <template>
+      La tengo. Muy mala. Prefiero no hablar de ello.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      te ^ experiment+ en proyectos [en de] equipo+ (de trabajo)
+   </pattern>
+   <template>
+      <srai>
+         tienes experiencia en la realizacion de proyectos en equipo de trabajo
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      tienes experiencia en (la realizacion de) proyectos [en de] equipo+ (de trabajo)
+   </pattern>
+   <template>
+      <srai>
+         tienes experiencia en la realizacion de proyectos en equipo de trabajo
+      </srai>
+   </template>
+</category>
+
+<!-- 7. Realizarias un trabajo que no fuera con tu especialidad -->
+<category>
+   <pattern>
+      realizarias un trabajo que no fuera con tu especialidad
+   </pattern>
+   <template>
+      Mientras me pagues, lo que sea.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ (a cabo) un trabajo que no [fuera sea] [con de] tu especialidad
+   </pattern>
+   <template>
+      <srai>
+         realizarias un trabajo que no fuera con tu especialidad
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ (a cabo) algo que no [fuera sea] [con de] tu especialidad
+   </pattern>
+   <template>
+      <srai>
+         realizarias un trabajo que no fuera con tu especialidad
+      </srai>
+   </template>
+</category>
+
+<!-- 8. Te desplazarias de manera ocasional a otros lugares -->
+<category>
+   <pattern>
+      te desplazarias de manera ocasional a otros lugares
+   </pattern>
+   <template>
+      Sí, yo voy a donde sea mientras me paguéis (y me deis de comer).
+   </template>
+</category>
+
+<category>
+   <pattern>
+      te desplazarias (de manera ocasional) a otro+ lugar+
+   </pattern>
+   <template>
+      <srai>
+         te desplazarias de manera ocasional a otros lugares
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ (de manera ocasional) a otro+ lugar+
+   </pattern>
+   <template>
+      <srai>
+         te desplazarias de manera ocasional a otros lugares
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ desplazar+ (de manera ocasional) a ^
+   </pattern>
+   <template>
+      <srai>
+         te desplazarias de manera ocasional a otros lugares
+      </srai>
+   </template>
+</category>
+
+<!-- 9. Te consideras una persona creativa -->
+<category>
+   <pattern>
+      te consideras una persona creativa
+   </pattern>
+   <template>
+      Una vez no tenía dinero y estuve durante toda una semana sobreviviendo con dos espaguetis y un tarro de esparragos. Así que sí, podriamos decir que soy creativo.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ eres (una persona) creativ+
+   </pattern>
+   <template>
+      <srai>
+         te consideras una persona creativa
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ te ves ^ creativ+
+   </pattern>
+   <template>
+      <srai>
+         te consideras una persona creativa
+      </srai>
+   </template>
+</category>
+
+<!-- 10. Que expectativas tienes de este trabajo -->
+<category>
+   <pattern>
+      que expectativas tienes de este trabajo
+   </pattern>
+   <template>
+      Pues yo creo que voy a estar muy bien y voy a ganar mucho dinero aquí eh.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ expectativas ^ (este) trabajo ^
+   </pattern>
+   <template>
+      <srai>
+         que expectativas tienes de este trabajo
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ esperas ^ [de para con] (este) trabajo ^
+   </pattern>
+   <template>
+      <srai>
+         que expectativas tienes de este trabajo
+      </srai>
+   </template>
+</category>
+
+<!-- 11. Que trabajos has tenido en esta tematica -->
+<category>
+   <pattern>
+      que trabajos has tenido en esta tematica
+   </pattern>
+   <template>
+      El número de trabajos que he tenido relacionados con este es tan grande que no sé ni pronunciarlo.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ trabajos ^ ha+ tenido ^ (tematica) ^
+   </pattern>
+   <template>
+      <srai>
+         que trabajos has tenido en esta tematica
+      </srai>
+   </template>
+</category>
+
+<!-- 12. Normalmente te llevas el trabajo a casa -->
+<category>
+   <pattern>
+      normalmente te llevas el trabajo a casa
+   </pattern>
+   <template>
+      Una vez que salga del trabajo a mi no me molestes. Aunque si es muy necesario y me lo pides por favor, supongo que puedo hacer trabajo extra en casa.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ te llevas el trabajo a casa ^
+   </pattern>
+   <template>
+      <srai>
+         normalmente te llevas el trabajo a casa
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ llevar+ el trabajo a casa ^
+   </pattern>
+   <template>
+      <srai>
+         normalmente te llevas el trabajo a casa
+      </srai>
+   </template>
+</category>
+
+<!-- 13. Cuales son tus aspiraciones salariales -->
+<category>
+   <pattern>
+      cuales son tus aspiraciones salariales
+   </pattern>
+   <template>
+      Con el trabajo tan bueno que hago, con que me de para comer todos los meses y una casa en la playa me basta.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ [salario sueldo paga] aspira+ ^
+   </pattern>
+   <template>
+      <srai>
+         cuales son tus aspiraciones salariales
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ aspiracion+ salarial+ ^
+   </pattern>
+   <template>
+      <srai>
+         cuales son tus aspiraciones salariales
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ a un * sueldo ^
+   </pattern>
+   <template>
+      <srai>
+         cuales son tus aspiraciones salariales
+      </srai>
+   </template>
+</category>
+
+<!-- 14. Donde te ves dentro de cinco años -->
+<category>
+   <pattern>
+      donde te ves dentro de cinco anos
+   </pattern>
+   <template>
+      Si aun no me he muerto, encerrado en mi cuarto comiendo gusanitos solo. Aunque si en cinco anos sigo en este trabajo tampoco me voy a quejar.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ te ves ^ [en dentro] (de) * anos ^
+   </pattern>
+   <template>
+      <srai>
+         donde te ves dentro de cinco anos
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ estar+ [en dentro] (de) * anos ^
+   </pattern>
+   <template>
+      <srai>
+         donde te ves dentro de cinco anos
+      </srai>
+   </template>
+</category>
+
+<!-- 15. No tienes experiencia para el puesto a desempeñar -->
+<category>
+   <pattern>
+      ^ no ^ tienes experiencia para el puesto a desempenar
+   </pattern>
+   <template>
+      A ver, no me vengas con esas, que si estoy aquí es porque quiero experiencia. No se puede exigir experiencia a alguien que acaba de salir de la universidad, ya aprenderé.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ no tienes experiencia [para en] este puesto ^
+   </pattern>
+   <template>
+      <srai>
+         no tienes experiencia para el puesto a desempenar
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ no ^ experiencia para ^ puesto ^
+   </pattern>
+   <template>
+      <srai>
+         no tienes experiencia para el puesto a desempenar
+      </srai>
+   </template>
+</category>
+
+<!-- 16. Que sabes de la empresa y el puesto de trabajo -->
+<category>
+   <pattern>
+      que sabes de la empresa y el puesto de trabajo
+   </pattern>
+   <template>
+      Que sois los mejores, tratais muy bien a vuestros empleados, que no os importa que se haga el vago en el trabajo y que pagáis muy bien. Sois los mejores, os quiero.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ sabes [de sobre] [la nuestra] empresa ^
+   </pattern>
+   <template>
+      <srai>
+         que sabes de la empresa y el puesto de trabajo
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ sabes [de sobre] ^ (puesto de) trabajo ^
+   </pattern>
+   <template>
+      <srai>
+         que sabes de la empresa y el puesto de trabajo
+      </srai>
+   </template>
+</category>
+
+<!-- 17. Que haces cuando consideras que tu jefe no tiene la razon -->
+<category>
+   <pattern>
+      que haces cuando consideras que tu jefe no tiene la razon
+   </pattern>
+   <template>
+      Decírselo bien clarito y que aprenda que por ser jefe no siempre puede llevar la razon.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ que haces cuando ^ jefe no ^ razon ^
+   </pattern>
+   <template>
+      <srai>
+         que haces cuando consideras que tu jefe no tiene la razon
+      </srai>
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ si ^ jefe no ^ razon ^
+   </pattern>
+   <template>
+      <srai>
+         que haces cuando consideras que tu jefe no tiene la razon
+      </srai>
+   </template>
+</category>
+
+<!-- 18. Por que deberiamos escogerte a ti -->
+<category>
+   <pattern>
+      por que deberiamos escogerte a ti
+   </pattern>
+   <template>
+      No creo que encontréis a nadie mejor que yo. Principalmente porque ya me he ocupado de deshacerme de los otros candidatos.
+   </template>
+</category>
+
+<category>
+   <pattern>
+      ^ [escoger+ elegir+] (a ti) ^
+   </pattern>
+   <template>
+      <srai>
+         por que deberiamos escogerte a ti
+      </srai>
+   </template>
+</category>
+
+</aiml>
