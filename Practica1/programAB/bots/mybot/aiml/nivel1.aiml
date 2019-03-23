@@ -54,9 +54,6 @@
                   <set name="topic">unknown</set>
                </think>
             </li>
-            <li>
-               Pero aclarate macho, que no te entiendo.
-            </li>
          </condition>
       </template>
    </category>
@@ -400,23 +397,6 @@
          Cuéntame de qué va la serie.
       </template>
    </category>
-
-   <category>
-      <pattern>
-         ^ no (lo) se ^
-      </pattern>
-      <template>
-         <think>
-            <set name="topic">sinopsis</set>
-         </think>
-         <addtomap>
-            <name><get name="titulo"/></name>
-            <key>genero</key>
-            <value><get name="genero"/></value>
-         </addtomap>
-         No pasa nada, no le ponemos género. Cuéntame de qué va la serie.
-      </template>
-   </category>
 </topic>
 
 <topic name="sinopsis">
@@ -435,23 +415,6 @@
             <value><get name="descripcion"/></value>
          </addtomap>
          Muy guay. Ahora dime en qué idiomas está.
-      </template>
-   </category>
-
-   <category>
-      <pattern>
-         ^ no (lo) se ^
-      </pattern>
-      <template>
-         <think>
-            <set name="topic">idio</set>
-         </think>
-         <addtomap>
-            <name><get name="titulo"/></name>
-            <key>descripcion</key>
-            <value><get name="descripcion"/></value>
-         </addtomap>
-         No pasa nada, no le ponemos sinopsis. Dime en qué idiomas está.
       </template>
    </category>
 </topic>
@@ -474,23 +437,6 @@
          Bien, ¿qué idiomas de subtítulos tiene?
       </template>
    </category>
-
-   <category>
-      <pattern>
-         ^ no (lo+) se ^
-      </pattern>
-      <template>
-         <think>
-            <set name="topic">subs</set>
-         </think>
-         <addtomap>
-            <name><get name="titulo"/></name>
-            <key>idiomas</key>
-            <value><srai>codealt <get name="idiomas"/></srai></value>
-         </addtomap>
-         No pasa nada, no le ponemos idiomas. ¿Sabes qué idiomas de subtítulos tiene?
-      </template>
-   </category>
 </topic>
 
 <topic name="subs">
@@ -511,23 +457,6 @@
          Maravilloso. Dime la web de la serie.
       </template>
    </category>
-
-   <category>
-      <pattern>
-         ^ no (lo) (se) ^
-      </pattern>
-      <template>
-         <think>
-            <set name="topic">www</set>
-         </think>
-         <addtomap>
-            <name><get name="titulo"/></name>
-            <key>subtitulos</key>
-            <value><get name="subtitulos"/></value>
-         </addtomap>
-         No pasa nada, no le ponemos subtítulos. ¿Sabes la web de la serie?
-      </template>
-   </category>
 </topic>
 
 <topic name="www">
@@ -546,23 +475,6 @@
             <value><get name="web"/></value>
          </addtomap>
          Estupendisimo de la muerte, ya está todo lo básico. ¿Quieres añadir capítulos a la serie?
-      </template>
-   </category>
-
-   <category>
-      <pattern>
-         ^ no (la) (se) ^
-      </pattern>
-      <template>
-         <think>
-            <set name="topic">fincrear</set>
-         </think>
-         <addtomap>
-            <name><get name="titulo"/></name>
-            <key>web</key>
-            <value><get name="web"/></value>
-         </addtomap>
-         Si no sabes la web de la serie no pasa nada. Con esto ya estaría todo, ¿quieres añadir capítulos a la serie?
       </template>
    </category>
 </topic>

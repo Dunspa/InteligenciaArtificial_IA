@@ -1,0 +1,12 @@
+drama
+crimen
+suspense
+biografia
+comedia
+fantasia
+ciencia
+cienciaficcion
+policiaca
+documental
+animacion
+anime

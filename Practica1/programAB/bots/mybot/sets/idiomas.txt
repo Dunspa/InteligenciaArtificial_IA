@@ -1,0 +1,15 @@
+espanol
+ingles
+frances
+ruso
+chino
+japones
+italiano
+catalan
+gallego
+euskera
+coreano
+aleman
+portugues
+arabe
+indi
