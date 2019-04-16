@@ -21,6 +21,8 @@ stack
 -
 queue
 -
+vector
+-
 
 /home/jlgallego99/Escritorio/Informatica/IA/Practica2/Comportamientos_Jugador/jugador.hpp
 comportamientos/comportamiento.hpp

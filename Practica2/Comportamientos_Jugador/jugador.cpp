@@ -6,6 +6,7 @@
 #include <set>
 #include <stack>
 #include <queue>
+#include <vector>
 
 // Este es el método principal que debe contener los 4 Comportamientos_Jugador
 // que se piden en la práctica. Tiene como entrada la información de los
@@ -102,7 +103,7 @@ bool ComportamientoJugador::pathFinding (int level, const estado &origen, const 
 			return pathFinding_Anchura(origen,destino,plan);
 			break;
 		case 3: cout << "Busqueda Costo Uniforme\n";
-			// Incluir aqui la llamada al busqueda de costo uniforme
+			return pathFinding_CostoUniforme(origen,destino,plan);
 			break;
 		case 4: cout << "Busqueda para el reto\n";
 			// Incluir aqui la llamada al algoritmo de búsqueda usado en el nivel 2
@@ -122,7 +123,6 @@ bool EsObstaculo(unsigned char casilla){
 	else
 	  return false;
 }
-
 
 // Comprueba si la casilla que hay delante es un obstaculo. Si es un
 // obstaculo devuelve true. Si no es un obstaculo, devuelve false y
@@ -157,6 +157,7 @@ bool ComportamientoJugador::HayObstaculoDelante(estado &st){
 struct nodo{
 	estado st;
 	list<Action> secuencia;
+	int costo;	// Costo hasta la raíz
 };
 
 struct ComparaEstados{
@@ -245,7 +246,7 @@ bool ComportamientoJugador::pathFinding_Profundidad(const estado &origen, const 
 // Implementación de la búsqueda en anchura.
 // Entran los puntos origen y destino y devuelve la
 // secuencia de acciones en plan, una lista de acciones.
-bool ComportamientoJugador::pathFinding_Anchura(const estado &origen, const estado &destino, list<Action> &plan) {
+bool ComportamientoJugador::pathFinding_Anchura(const estado &origen, const estado &destino, list<Action> &plan){
 	//Borro la lista
 	cout << "Calculando plan\n";
 	plan.clear();
@@ -265,7 +266,7 @@ bool ComportamientoJugador::pathFinding_Anchura(const estado &origen, const esta
 		// Generar descendiente de girar a la derecha
 		nodo hijoTurnR = current;
 		hijoTurnR.st.orientacion = (hijoTurnR.st.orientacion+1)%4;
-		if (generados.find(hijoTurnR.st) == generados.end()){
+		if (generados.find(hijoTurnR.st) == generados.end()){	// Si no se ha encontrado
 			hijoTurnR.secuencia.push_back(actTURN_R);
 			cola.push(hijoTurnR);
 		}
@@ -287,7 +288,7 @@ bool ComportamientoJugador::pathFinding_Anchura(const estado &origen, const esta
 			}
 		}
 
-		// Tomo el siguiente valor de la pila
+		// Tomo el siguiente valor de la cola
 		if (!cola.empty()){
 			current = cola.front();
 		}
@@ -304,6 +305,128 @@ bool ComportamientoJugador::pathFinding_Anchura(const estado &origen, const esta
 		return true;
 	}
 	else {
+		cout << "No encontrado plan\n";
+	}
+
+	return false;
+}
+
+//---------------------- Implementación de la busqueda con costo uniforme ---------------------------
+
+int ComportamientoJugador::CalculaCosto(const int fila, const int columna, const int orientacion) const{
+	int costo = 0;
+	unsigned char tipo = mapaResultado[fila][columna];
+
+	switch (tipo){
+		case 'B':
+			costo += 5;
+			break;
+		case 'A':
+			costo += 10;
+			break;
+		case 'T':
+			costo += 2;
+			break;
+	}
+
+	return costo;
+}
+
+struct ComparaCostos{
+	bool operator()(const nodo & a, const nodo & n) const{
+		if (a.st.fila == n.st.fila && a.st.columna == n.st.columna && a.costo < n.costo)
+			return true;
+		else
+			return false;
+	}
+};
+
+// Implementación de la búsqueda con costo uniforme.
+// Entran los puntos origen y destino y devuelve la
+// secuencia de acciones en plan, una lista de acciones.
+bool ComportamientoJugador::pathFinding_CostoUniforme(const estado & origen, const estado & destino, list<Action> & plan){
+	//Borro la lista
+	cout << "Calculando plan\n";
+	plan.clear();
+	set<estado, ComparaEstados> generados;		// Lista de Cerrados (explored)
+	set<nodo, ComparaCostos> abiertos;	// Lista de Abiertos (Cola con prioridad de nodos ordenados por menor costo) (frontier)
+
+  	nodo current;
+	current.st = origen;
+	current.secuencia.clear();
+	int costo = 0;
+	current.costo = costo;
+
+	abiertos.insert(current);
+
+  	while (!abiertos.empty() and (current.st.fila != destino.fila or current.st.columna != destino.columna)){
+		abiertos.erase(current);
+		generados.insert(current.st);
+
+		// Generar descendiente de girar a la derecha
+		nodo hijoTurnR = current;
+		hijoTurnR.st.orientacion = (hijoTurnR.st.orientacion+1)%4;
+		//hijoTurnR.costo = 1 + current.costo + CalculaCosto(hijoTurnR.st.fila, hijoTurnR.st.columna, hijoTurnR.st.orientacion);
+		if (generados.find(hijoTurnR.st) == generados.end()){	// Si no se ha cerrado
+			//if (abiertos.find(hijoTurnR) == abiertos.end()){ // Si no se ha abierto
+				hijoTurnR.secuencia.push_back(actTURN_R);
+				abiertos.insert(hijoTurnR);
+			//}
+			/* Si ya se ha abierto y tiene mayor costo, se sobreescribe
+			else if ((abiertos.find(hijoTurnR) != abiertos.end()) && (hijoTurnR.costo > (*abiertos.find(hijoTurnR)).costo)){
+				abiertos.erase(abiertos.find(hijoTurnR));
+				abiertos.insert(hijoTurnR);
+			}*/
+		}
+
+		// Generar descendiente de girar a la izquierda
+		nodo hijoTurnL = current;
+		hijoTurnL.st.orientacion = (hijoTurnL.st.orientacion+3)%4;
+		//hijoTurnL.costo = 1 + current.costo + CalculaCosto(hijoTurnL.st.fila, hijoTurnL.st.columna, hijoTurnL.st.orientacion);
+		if (generados.find(hijoTurnL.st) == generados.end()){
+			//if (abiertos.find(hijoTurnL) == abiertos.end()){
+				hijoTurnL.secuencia.push_back(actTURN_L);
+				abiertos.insert(hijoTurnL);
+			/*}
+			else if ((abiertos.find(hijoTurnL) != abiertos.end()) && (hijoTurnL.costo > (*abiertos.find(hijoTurnL)).costo)){
+				abiertos.erase(abiertos.find(hijoTurnL));
+				abiertos.insert(hijoTurnL);
+			}*/
+		}
+
+		// Generar descendiente de avanzar
+		nodo hijoForward = current;
+		if (!HayObstaculoDelante(hijoForward.st)){
+			hijoForward.costo = current.costo + CalculaCosto(hijoForward.st.fila, hijoForward.st.columna, hijoForward.st.orientacion);
+			if (generados.find(hijoForward.st) == generados.end()){
+				if (abiertos.find(hijoForward) == abiertos.end()){
+					hijoForward.secuencia.push_back(actFORWARD);
+					abiertos.insert(hijoForward);
+				}
+				else if ((abiertos.find(hijoForward) != abiertos.end()) && (hijoForward.costo > (*abiertos.find(hijoForward)).costo)){
+					abiertos.erase(abiertos.find(hijoForward));
+					abiertos.insert(hijoForward);
+				}
+			}
+		}
+
+		// Tomo el siguiente valor de la cola (el de menor costo)
+		if (!abiertos.empty()){
+			current = *abiertos.begin();
+		}
+	}
+
+	cout << "Terminada la busqueda\n";
+  	if (current.st.fila == destino.fila and current.st.columna == destino.columna){
+		cout << "Cargando el plan\n";
+		plan = current.secuencia;
+		cout << "Longitud del plan: " << plan.size() << endl;
+		PintaPlan(plan);
+		// ver el plan en el mapa
+		VisualizaPlan(origen, plan);
+		return true;
+	}
+	else{
 		cout << "No encontrado plan\n";
 	}
 
