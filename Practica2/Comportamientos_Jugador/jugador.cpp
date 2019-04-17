@@ -106,7 +106,8 @@ bool ComportamientoJugador::pathFinding (int level, const estado &origen, const 
 			return pathFinding_CostoUniforme(origen,destino,plan);
 			break;
 		case 4: cout << "Busqueda para el reto\n";
-			// Incluir aqui la llamada al algoritmo de búsqueda usado en el nivel 2
+			// Nivel 2 utilizando búsqueda en anchura
+			return pathFinding_Anchura(origen,destino,plan);
 			break;
 	}
 	cout << "Comportamiento sin implementar\n";
@@ -357,58 +358,47 @@ bool ComportamientoJugador::pathFinding_CostoUniforme(const estado & origen, con
 		// Generar descendiente de girar a la derecha
 		nodo hijoTurnR = current;
 		hijoTurnR.st.orientacion = (hijoTurnR.st.orientacion+1)%4;
-		//hijoTurnR.costo = 1 + current.costo + CalculaCosto(hijoTurnR.st.fila, hijoTurnR.st.columna, hijoTurnR.st.orientacion);
 		if (generados.find(hijoTurnR.st) == generados.end()){	// Si no se ha cerrado
-			//if (hijoTurnR.st.fila != current.st.fila && hijoTurnR.st.columna != current.st.columna){
-				hijoTurnR.secuencia.push_back(actTURN_R);
-				casilla = {hijoTurnR.costo, hijoTurnR};
-				abiertos.insert(casilla);
-			//}
-			/*
-			else if ((abiertos.find(hijoTurnR) != abiertos.end()) && (hijoTurnR.costo > (*abiertos.find(hijoTurnR)).costo)){
-				abiertos.erase(abiertos.find(hijoTurnR));
-				abiertos.insert(hijoTurnR);
-			}*/
+			hijoTurnR.secuencia.push_back(actTURN_R);
+			casilla = {hijoTurnR.costo, hijoTurnR};
+			abiertos.insert(casilla);
 		}
 
 		// Generar descendiente de girar a la izquierda
 		nodo hijoTurnL = current;
 		hijoTurnL.st.orientacion = (hijoTurnL.st.orientacion+3)%4;
-		//hijoTurnL.costo = 1 + current.costo + CalculaCosto(hijoTurnL.st.fila, hijoTurnL.st.columna, hijoTurnL.st.orientacion);
 		if (generados.find(hijoTurnL.st) == generados.end()){ // Si no se ha cerrado
-			//if (hijoTurnL.st.fila != current.st.fila && hijoTurnL.st.columna != current.st.columna){
-				hijoTurnL.secuencia.push_back(actTURN_L);
-				casilla = {hijoTurnL.costo, hijoTurnL};
-				abiertos.insert(casilla);
-			//}
-			/*else if ((abiertos.find(hijoTurnL) != abiertos.end()) && (hijoTurnL.costo > (*abiertos.find(hijoTurnL)).costo)){
-				abiertos.erase(abiertos.find(hijoTurnL));
-				abiertos.insert(hijoTurnL);
-			}*/
+			hijoTurnL.secuencia.push_back(actTURN_L);
+			casilla = {hijoTurnL.costo, hijoTurnL};
+			abiertos.insert(casilla);
 		}
 
 		// Generar descendiente de avanzar
 		nodo hijoForward = current;
 		if (!HayObstaculoDelante(hijoForward.st)){
+			// Costo del nodo es el suyo más el de sus ancestros
 			hijoForward.costo = current.costo + CalculaCosto(hijoForward.st.fila, hijoForward.st.columna, hijoForward.st.orientacion);
 			if (generados.find(hijoForward.st) == generados.end()){	// Si no se ha cerrado
-				// Buscar el nodo para borrarlo
+				// Buscar el nodo para ver si ya existe y poder borrarlo
 				multimap<int, nodo>::iterator it;
 				bool encontrado = false;
 				for (it = abiertos.begin() ; it != abiertos.end() && !encontrado ; ++it){
-					if (hijoForward.st.fila == (*it).second.st.fila && hijoForward.st.columna == (*it).second.st.columna){ // Si no se ha abierto
+					if (hijoForward.st.fila == (*it).second.st.fila && hijoForward.st.columna == (*it).second.st.columna){
 						encontrado = true;
-						if (hijoForward.costo < (*it).first && it != abiertos.end()){
-							hijoForward.secuencia.push_back(actFORWARD);
-							casilla = {hijoForward.costo, hijoForward};
-							abiertos.erase(it);
-							abiertos.insert(casilla);
-						}
 					}
 				}
 
 				// Si ya se ha abierto (es el mismo nodo) y tiene mayor costo, se sobreescribe
-				if (!encontrado){
+				if (encontrado){
+					if (hijoForward.costo < (*it).first && it != abiertos.end()){
+						hijoForward.secuencia.push_back(actFORWARD);
+						casilla = {hijoForward.costo, hijoForward};
+						abiertos.erase(it);
+						abiertos.insert(casilla);
+					}
+				}
+				// Si no se ha abierto, se añade a la frontera
+				else{
 					hijoForward.secuencia.push_back(actFORWARD);
 					casilla = {hijoForward.costo, hijoForward};
 					abiertos.insert(casilla);
