@@ -6,7 +6,7 @@
 #include <set>
 #include <stack>
 #include <queue>
-#include <vector>
+#include <map>
 
 // Este es el método principal que debe contener los 4 Comportamientos_Jugador
 // que se piden en la práctica. Tiene como entrada la información de los
@@ -332,15 +332,6 @@ int ComportamientoJugador::CalculaCosto(const int fila, const int columna, const
 	return costo;
 }
 
-struct ComparaCostos{
-	bool operator()(const nodo & a, const nodo & n) const{
-		if (a.st.fila == n.st.fila && a.st.columna == n.st.columna && a.costo < n.costo)
-			return true;
-		else
-			return false;
-	}
-};
-
 // Implementación de la búsqueda con costo uniforme.
 // Entran los puntos origen y destino y devuelve la
 // secuencia de acciones en plan, una lista de acciones.
@@ -348,19 +339,19 @@ bool ComportamientoJugador::pathFinding_CostoUniforme(const estado & origen, con
 	//Borro la lista
 	cout << "Calculando plan\n";
 	plan.clear();
-	set<estado, ComparaEstados> generados;		// Lista de Cerrados (explored)
-	set<nodo, ComparaCostos> abiertos;	// Lista de Abiertos (Cola con prioridad de nodos ordenados por menor costo) (frontier)
+	set<estado, ComparaEstados> generados;	// Lista de Cerrados (explored)
+	multimap<int, nodo> abiertos;				// Lista de Abiertos (Cola con prioridad de nodos ordenados por menor costo) (frontier)
 
   	nodo current;
 	current.st = origen;
 	current.secuencia.clear();
-	int costo = 0;
-	current.costo = costo;
+	current.costo = 0;
+	pair<int, nodo> casilla = {0, current};
 
-	abiertos.insert(current);
+	abiertos.insert(casilla);
 
   	while (!abiertos.empty() and (current.st.fila != destino.fila or current.st.columna != destino.columna)){
-		abiertos.erase(current);
+		abiertos.erase(abiertos.begin());	// Borrar primero (FIFO)
 		generados.insert(current.st);
 
 		// Generar descendiente de girar a la derecha
@@ -368,11 +359,12 @@ bool ComportamientoJugador::pathFinding_CostoUniforme(const estado & origen, con
 		hijoTurnR.st.orientacion = (hijoTurnR.st.orientacion+1)%4;
 		//hijoTurnR.costo = 1 + current.costo + CalculaCosto(hijoTurnR.st.fila, hijoTurnR.st.columna, hijoTurnR.st.orientacion);
 		if (generados.find(hijoTurnR.st) == generados.end()){	// Si no se ha cerrado
-			//if (abiertos.find(hijoTurnR) == abiertos.end()){ // Si no se ha abierto
+			//if (hijoTurnR.st.fila != current.st.fila && hijoTurnR.st.columna != current.st.columna){
 				hijoTurnR.secuencia.push_back(actTURN_R);
-				abiertos.insert(hijoTurnR);
+				casilla = {hijoTurnR.costo, hijoTurnR};
+				abiertos.insert(casilla);
 			//}
-			/* Si ya se ha abierto y tiene mayor costo, se sobreescribe
+			/*
 			else if ((abiertos.find(hijoTurnR) != abiertos.end()) && (hijoTurnR.costo > (*abiertos.find(hijoTurnR)).costo)){
 				abiertos.erase(abiertos.find(hijoTurnR));
 				abiertos.insert(hijoTurnR);
@@ -383,12 +375,13 @@ bool ComportamientoJugador::pathFinding_CostoUniforme(const estado & origen, con
 		nodo hijoTurnL = current;
 		hijoTurnL.st.orientacion = (hijoTurnL.st.orientacion+3)%4;
 		//hijoTurnL.costo = 1 + current.costo + CalculaCosto(hijoTurnL.st.fila, hijoTurnL.st.columna, hijoTurnL.st.orientacion);
-		if (generados.find(hijoTurnL.st) == generados.end()){
-			//if (abiertos.find(hijoTurnL) == abiertos.end()){
+		if (generados.find(hijoTurnL.st) == generados.end()){ // Si no se ha cerrado
+			//if (hijoTurnL.st.fila != current.st.fila && hijoTurnL.st.columna != current.st.columna){
 				hijoTurnL.secuencia.push_back(actTURN_L);
-				abiertos.insert(hijoTurnL);
-			/*}
-			else if ((abiertos.find(hijoTurnL) != abiertos.end()) && (hijoTurnL.costo > (*abiertos.find(hijoTurnL)).costo)){
+				casilla = {hijoTurnL.costo, hijoTurnL};
+				abiertos.insert(casilla);
+			//}
+			/*else if ((abiertos.find(hijoTurnL) != abiertos.end()) && (hijoTurnL.costo > (*abiertos.find(hijoTurnL)).costo)){
 				abiertos.erase(abiertos.find(hijoTurnL));
 				abiertos.insert(hijoTurnL);
 			}*/
@@ -398,21 +391,34 @@ bool ComportamientoJugador::pathFinding_CostoUniforme(const estado & origen, con
 		nodo hijoForward = current;
 		if (!HayObstaculoDelante(hijoForward.st)){
 			hijoForward.costo = current.costo + CalculaCosto(hijoForward.st.fila, hijoForward.st.columna, hijoForward.st.orientacion);
-			if (generados.find(hijoForward.st) == generados.end()){
-				if (abiertos.find(hijoForward) == abiertos.end()){
-					hijoForward.secuencia.push_back(actFORWARD);
-					abiertos.insert(hijoForward);
+			if (generados.find(hijoForward.st) == generados.end()){	// Si no se ha cerrado
+				// Buscar el nodo para borrarlo
+				multimap<int, nodo>::iterator it;
+				bool encontrado = false;
+				for (it = abiertos.begin() ; it != abiertos.end() && !encontrado ; ++it){
+					if (hijoForward.st.fila == (*it).second.st.fila && hijoForward.st.columna == (*it).second.st.columna){ // Si no se ha abierto
+						encontrado = true;
+						if (hijoForward.costo < (*it).first && it != abiertos.end()){
+							hijoForward.secuencia.push_back(actFORWARD);
+							casilla = {hijoForward.costo, hijoForward};
+							abiertos.erase(it);
+							abiertos.insert(casilla);
+						}
+					}
 				}
-				else if ((abiertos.find(hijoForward) != abiertos.end()) && (hijoForward.costo > (*abiertos.find(hijoForward)).costo)){
-					abiertos.erase(abiertos.find(hijoForward));
-					abiertos.insert(hijoForward);
+
+				// Si ya se ha abierto (es el mismo nodo) y tiene mayor costo, se sobreescribe
+				if (!encontrado){
+					hijoForward.secuencia.push_back(actFORWARD);
+					casilla = {hijoForward.costo, hijoForward};
+					abiertos.insert(casilla);
 				}
 			}
 		}
 
 		// Tomo el siguiente valor de la cola (el de menor costo)
 		if (!abiertos.empty()){
-			current = *abiertos.begin();
+			current = (*abiertos.begin()).second;
 		}
 	}
 
