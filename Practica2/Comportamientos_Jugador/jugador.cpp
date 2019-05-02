@@ -11,7 +11,7 @@
 // Este es el método principal que debe contener los 4 Comportamientos_Jugador
 // que se piden en la práctica. Tiene como entrada la información de los
 // sensores y devuelve la acción a realizar.
-Action ComportamientoJugador::think(Sensores sensores) {
+Action ComportamientoJugador::think(Sensores sensores){
 	Action accion = actIDLE;
 
 	// Estoy en el nivel 1
@@ -84,13 +84,169 @@ Action ComportamientoJugador::think(Sensores sensores) {
 		ultimaAccion = accion;
 	}
 	// Estoy en el nivel 2
-	else {
+	else{
+		// Actualizar el efecto de la última acción
+		switch (ultimaAccion){
+			case actTURN_R:
+				brujula = (brujula + 1) % 4;
+				break;
+			case actTURN_L:
+				brujula = (brujula + 3) % 4;
+				break;
+			case actFORWARD:
+				switch (brujula){
+					case 0:
+						fil--;
+						break;
+					case 1:
+						col++;
+						break;
+					case 2:
+						fil++;
+						break;
+					case 3:
+						col--;
+						break;
+				}
+				break;
+		}
 
+		// Mirar si ha cambiado el destino
+		if (sensores.destinoF != destino.fila || sensores.destinoC != destino.columna){
+			destino.fila = sensores.destinoF;
+			destino.columna = sensores.destinoC;
+			hayPlan = false;
+		}
+
+		// Si ya he encontrado un PK, se centra en buscar los objetivos
+		if (puedoDescubrir){
+			// Rellenar mapa con los valores de los sensores
+			rellenaMapa(sensores);
+
+			// Se calcula un camino hasta el destino
+			if (!hayPlan){
+				actual.fila = fil;
+				actual.columna = col;
+				actual.orientacion = brujula;
+				hayPlan = pathFinding(sensores.nivel, actual, destino, plan);
+			}
+
+			// Si hay un precipicio, cambia de dirección
+			if (sensores.terreno[2] == 'P' && accion == actFORWARD){
+				hayPlan = false;
+				accion = actTURN_R;
+			}
+
+			// Cada cinco pasos recalcula plan
+			if (pasos_recalcular >= 3){
+				accion = actIDLE;
+				pasos_recalcular = 0;
+				hayPlan = false;
+			}
+
+			// Siguiente acción a realizar
+			// Se sigue el plan ideado
+			if (hayPlan && plan.size() > 0){
+				accion = plan.front();
+
+				// Si hay un aldeano, no hace esa parte del plan y se espera
+				if (sensores.superficie[2] == 'a'){
+					accion = actIDLE;
+				}
+				else{
+					pasos_recalcular++;
+					plan.erase(plan.begin());
+				}
+			}
+		}
+		// Si aún no ha encontrado un PK, se centra en buscar ese PK
+		else{
+			// Crea un plan hacia un punto de referencia si está en sus sensores
+			//estado pk = buscaPuntoReferencia(sensores);
+			//destino.fila = pk.fila;
+			//destino.columna = pk.columna;
+			//hayPlan = pathFinding(sensores.nivel, actual, pk, plan);
+
+			// Se activa un comportamiento reactivo mientras no se haya encontrado un punto de referencia
+			if (sensores.terreno[2] == 'P' || sensores.terreno[2] == 'M' ||
+				sensores.terreno[2] == 'D' || sensores.superficie[2] == 'a'){
+				accion = actTURN_R;
+			}
+			else{
+				accion = actFORWARD;
+			}
+
+			// Si la casilla es un PK, se espera, para empezar a rellenar mapa en la próxima iteración
+			if (sensores.terreno[0] == 'K'){
+				fil = sensores.mensajeF;
+				col = sensores.mensajeC;
+				accion = actIDLE;
+				puedoDescubrir = true;
+			}
+		}
+
+		// Recordar la última acción
+		ultimaAccion = accion;
 	}
 
-  return accion;
+  	return accion;
 }
 
+// Rellena el mapa con lo que captan los sensores
+void ComportamientoJugador::rellenaMapa(Sensores sensores){
+	mapaResultado[fil][col] = sensores.terreno[0];
+
+	int i = 1;
+	// Los sensores detectan hasta profundidad 3
+	int profundo = 1;
+	// Amplitud que detectan los sensores a cada profundidad, en profundidad 3 es 7
+	int amplitud = 3;
+
+	// TODO : Rellena mal el mapa (rellena atras lo que ve alante)
+	while (i < 16){
+		for (int j = -profundo ; j < amplitud-profundo ; j++){
+			switch (brujula){
+				case 0:
+					mapaResultado[fil-profundo][col+j] = sensores.terreno[i];
+					//mapaResultado[fil-1][col] = sensores.terreno[2];
+					break;
+				case 1:
+					mapaResultado[fil+j][col+profundo] = sensores.terreno[i];
+					//mapaResultado[fil][col+1] = sensores.terreno[2];
+					break;
+				case 2:
+					mapaResultado[fil+profundo][col-j] = sensores.terreno[i];
+					//mapaResultado[fil-1][col] = sensores.terreno[2];
+					break;
+				case 3:
+					mapaResultado[fil-j][col-profundo] = sensores.terreno[i];
+					//mapaResultado[fil][col-1] = sensores.terreno[2];
+					break;
+			}
+
+			i++;
+		}
+
+		profundo++;
+		amplitud += 2;
+	}
+
+	/*mapaResultado[fil-1][col+1] = sensores.terreno[1];
+	mapaResultado[fil][col+1] = sensores.terreno[2];
+	mapaResultado[fil+1][col+1] = sensores.terreno[3];
+	mapaResultado[fil-2][col+2] = sensores.terreno[4];
+	mapaResultado[fil-1][col+2] = sensores.terreno[5];
+	mapaResultado[fil][col+2] = sensores.terreno[6];
+	mapaResultado[fil+1][col+2] = sensores.terreno[7];
+	mapaResultado[fil+2][col+2] = sensores.terreno[8];
+	mapaResultado[fil-3][col+3] = sensores.terreno[9];
+	mapaResultado[fil-2][col+3] = sensores.terreno[10];
+	mapaResultado[fil-1][col+3] = sensores.terreno[11];
+	mapaResultado[fil][col+3] = sensores.terreno[12];
+	mapaResultado[fil+1][col+3] = sensores.terreno[13];
+	mapaResultado[fil+2][col+3] = sensores.terreno[14];
+	mapaResultado[fil+3][col+3] = sensores.terreno[15];*/
+}
 
 // Llama al algoritmo de busqueda que se usará en cada comportamiento del agente
 // Level representa el comportamiento en el que fue iniciado el agente.
@@ -106,8 +262,8 @@ bool ComportamientoJugador::pathFinding (int level, const estado &origen, const 
 			return pathFinding_CostoUniforme(origen,destino,plan);
 			break;
 		case 4: cout << "Busqueda para el reto\n";
-			// Nivel 2 utilizando búsqueda en anchura
-			return pathFinding_Anchura(origen,destino,plan);
+			// Nivel 2 utilizando búsqueda de costo uniforme
+			return pathFinding_CostoUniforme(origen,destino,plan);
 			break;
 	}
 	cout << "Comportamiento sin implementar\n";
@@ -315,18 +471,21 @@ bool ComportamientoJugador::pathFinding_Anchura(const estado &origen, const esta
 //---------------------- Implementación de la busqueda con costo uniforme ---------------------------
 
 int ComportamientoJugador::CalculaCosto(const int fila, const int columna, const int orientacion) const{
-	int costo = 0;
+	int costo = 1;
 	unsigned char tipo = mapaResultado[fila][columna];
 
 	switch (tipo){
 		case 'B':
-			costo += 5;
+			costo = 5;
 			break;
 		case 'A':
-			costo += 10;
+			costo = 10;
 			break;
 		case 'T':
-			costo += 2;
+			costo = 2;
+			break;
+		case '?':
+			costo = 1;
 			break;
 	}
 
@@ -358,19 +517,71 @@ bool ComportamientoJugador::pathFinding_CostoUniforme(const estado & origen, con
 		// Generar descendiente de girar a la derecha
 		nodo hijoTurnR = current;
 		hijoTurnR.st.orientacion = (hijoTurnR.st.orientacion+1)%4;
+		hijoTurnR.costo += 1;
 		if (generados.find(hijoTurnR.st) == generados.end()){	// Si no se ha cerrado
-			hijoTurnR.secuencia.push_back(actTURN_R);
-			casilla = {hijoTurnR.costo, hijoTurnR};
-			abiertos.insert(casilla);
+			// Buscar el nodo para ver si ya existe y poder borrarlo
+			multimap<int, nodo>::iterator it;
+			bool encontrado = false;
+			for (it = abiertos.begin() ; it != abiertos.end() && !encontrado ; ++it){
+				if (hijoTurnR.st.fila == (*it).second.st.fila && hijoTurnR.st.columna == (*it).second.st.columna && hijoTurnR.st.orientacion == (*it).second.st.orientacion){
+					encontrado = true;
+
+					if (hijoTurnR.costo < (*it).first && it != abiertos.end()){
+						hijoTurnR.secuencia.push_back(actTURN_R);
+						casilla = {hijoTurnR.costo, hijoTurnR};
+						abiertos.erase(it);
+						abiertos.insert(casilla);
+					}
+				}
+			}
+
+			// Si ya se ha abierto (es el mismo nodo) y tiene mayor costo, se sobreescribe
+
+			// Si no se ha abierto, se añade a la frontera
+			if (!encontrado){
+				hijoTurnR.secuencia.push_back(actTURN_R);
+				casilla = {hijoTurnR.costo, hijoTurnR};
+				abiertos.insert(casilla);
+			}
+
+			/*hijoTurnR.secuencia.push_back(actTURN_R);
+			casilla = {hijoTurnR.costo + 1, hijoTurnR};
+			abiertos.insert(casilla);*/
 		}
 
 		// Generar descendiente de girar a la izquierda
 		nodo hijoTurnL = current;
 		hijoTurnL.st.orientacion = (hijoTurnL.st.orientacion+3)%4;
+		hijoTurnL.costo += 1;
 		if (generados.find(hijoTurnL.st) == generados.end()){ // Si no se ha cerrado
-			hijoTurnL.secuencia.push_back(actTURN_L);
-			casilla = {hijoTurnL.costo, hijoTurnL};
-			abiertos.insert(casilla);
+			// Buscar el nodo para ver si ya existe y poder borrarlo
+			multimap<int, nodo>::iterator it;
+			bool encontrado = false;
+			for (it = abiertos.begin() ; it != abiertos.end() && !encontrado ; ++it){
+				if (hijoTurnL.st.fila == (*it).second.st.fila && hijoTurnL.st.columna == (*it).second.st.columna && hijoTurnL.st.orientacion == (*it).second.st.orientacion){
+					encontrado = true;
+
+					if (hijoTurnL.costo < (*it).first && it != abiertos.end()){
+						hijoTurnL.secuencia.push_back(actTURN_L);
+						casilla = {hijoTurnL.costo, hijoTurnL};
+						abiertos.erase(it);
+						abiertos.insert(casilla);
+					}
+				}
+			}
+
+			// Si ya se ha abierto (es el mismo nodo) y tiene mayor costo, se sobreescribe
+
+			// Si no se ha abierto, se añade a la frontera
+			if (!encontrado){
+				hijoTurnL.secuencia.push_back(actTURN_L);
+				casilla = {hijoTurnL.costo, hijoTurnL};
+				abiertos.insert(casilla);
+			}
+
+			/*hijoTurnL.secuencia.push_back(actTURN_L);
+			casilla = {hijoTurnL.costo + 1, hijoTurnL};
+			abiertos.insert(casilla);*/
 		}
 
 		// Generar descendiente de avanzar
@@ -383,22 +594,22 @@ bool ComportamientoJugador::pathFinding_CostoUniforme(const estado & origen, con
 				multimap<int, nodo>::iterator it;
 				bool encontrado = false;
 				for (it = abiertos.begin() ; it != abiertos.end() && !encontrado ; ++it){
-					if (hijoForward.st.fila == (*it).second.st.fila && hijoForward.st.columna == (*it).second.st.columna){
+					if (hijoForward.st.fila == (*it).second.st.fila && hijoForward.st.columna == (*it).second.st.columna && hijoForward.st.orientacion == (*it).second.st.orientacion){
 						encontrado = true;
+
+						if (hijoForward.costo < (*it).first){
+							hijoForward.secuencia.push_back(actFORWARD);
+							casilla = {hijoForward.costo, hijoForward};
+							abiertos.erase(it);
+							abiertos.insert(casilla);
+						}
+
 					}
 				}
 
 				// Si ya se ha abierto (es el mismo nodo) y tiene mayor costo, se sobreescribe
-				if (encontrado){
-					if (hijoForward.costo < (*it).first && it != abiertos.end()){
-						hijoForward.secuencia.push_back(actFORWARD);
-						casilla = {hijoForward.costo, hijoForward};
-						abiertos.erase(it);
-						abiertos.insert(casilla);
-					}
-				}
-				// Si no se ha abierto, se añade a la frontera
-				else{
+
+				if(!encontrado){
 					hijoForward.secuencia.push_back(actFORWARD);
 					casilla = {hijoForward.costo, hijoForward};
 					abiertos.insert(casilla);
@@ -416,6 +627,7 @@ bool ComportamientoJugador::pathFinding_CostoUniforme(const estado & origen, con
   	if (current.st.fila == destino.fila and current.st.columna == destino.columna){
 		cout << "Cargando el plan\n";
 		plan = current.secuencia;
+		cout << "Coste:" << current.costo << endl;
 		cout << "Longitud del plan: " << plan.size() << endl;
 		PintaPlan(plan);
 		// ver el plan en el mapa
