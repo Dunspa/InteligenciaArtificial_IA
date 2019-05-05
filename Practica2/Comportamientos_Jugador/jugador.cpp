@@ -161,12 +161,6 @@ Action ComportamientoJugador::think(Sensores sensores){
 		}
 		// Si aún no ha encontrado un PK, se centra en buscar ese PK
 		else{
-			// Crea un plan hacia un punto de referencia si está en sus sensores
-			//estado pk = buscaPuntoReferencia(sensores);
-			//destino.fila = pk.fila;
-			//destino.columna = pk.columna;
-			//hayPlan = pathFinding(sensores.nivel, actual, pk, plan);
-
 			// Se activa un comportamiento reactivo mientras no se haya encontrado un punto de referencia
 			if (sensores.terreno[2] == 'P' || sensores.terreno[2] == 'M' ||
 				sensores.terreno[2] == 'D' || sensores.superficie[2] == 'a'){
@@ -174,6 +168,15 @@ Action ComportamientoJugador::think(Sensores sensores){
 			}
 			else{
 				accion = actFORWARD;
+			}
+
+			// Aleatoriamente gira a la derecha, para evitar que se quede pegado al borde
+			// Inicializar semilla aleatoria
+		   srand (time(NULL));
+			// Generar número entre 1 y 100
+	      int n = rand() % 30 + 1;
+			if (n == 3){	// Si es el 3, gira a la derecha
+				accion = actTURN_R;
 			}
 
 			// Si la casilla es un PK, se espera, para empezar a rellenar mapa en la próxima iteración
@@ -202,7 +205,6 @@ void ComportamientoJugador::rellenaMapa(Sensores sensores){
 	// Amplitud que detectan los sensores a cada profundidad, en profundidad 3 es 7
 	int amplitud = 3;
 
-	// TODO : Rellena mal el mapa (rellena atras lo que ve alante)
 	while (i < 16){
 		for (int j = -profundo ; j < amplitud-profundo ; j++){
 			switch (brujula){
@@ -526,7 +528,8 @@ bool ComportamientoJugador::pathFinding_CostoUniforme(const estado & origen, con
 				if (hijoTurnR.st.fila == (*it).second.st.fila && hijoTurnR.st.columna == (*it).second.st.columna && hijoTurnR.st.orientacion == (*it).second.st.orientacion){
 					encontrado = true;
 
-					if (hijoTurnR.costo < (*it).first && it != abiertos.end()){
+					// Si ya se ha abierto (es el mismo nodo) y tiene mayor costo, se sobreescribe
+					if (hijoTurnR.costo < (*it).first){
 						hijoTurnR.secuencia.push_back(actTURN_R);
 						casilla = {hijoTurnR.costo, hijoTurnR};
 						abiertos.erase(it);
@@ -535,7 +538,7 @@ bool ComportamientoJugador::pathFinding_CostoUniforme(const estado & origen, con
 				}
 			}
 
-			// Si ya se ha abierto (es el mismo nodo) y tiene mayor costo, se sobreescribe
+
 
 			// Si no se ha abierto, se añade a la frontera
 			if (!encontrado){
@@ -543,10 +546,6 @@ bool ComportamientoJugador::pathFinding_CostoUniforme(const estado & origen, con
 				casilla = {hijoTurnR.costo, hijoTurnR};
 				abiertos.insert(casilla);
 			}
-
-			/*hijoTurnR.secuencia.push_back(actTURN_R);
-			casilla = {hijoTurnR.costo + 1, hijoTurnR};
-			abiertos.insert(casilla);*/
 		}
 
 		// Generar descendiente de girar a la izquierda
@@ -561,7 +560,8 @@ bool ComportamientoJugador::pathFinding_CostoUniforme(const estado & origen, con
 				if (hijoTurnL.st.fila == (*it).second.st.fila && hijoTurnL.st.columna == (*it).second.st.columna && hijoTurnL.st.orientacion == (*it).second.st.orientacion){
 					encontrado = true;
 
-					if (hijoTurnL.costo < (*it).first && it != abiertos.end()){
+					// Si ya se ha abierto (es el mismo nodo) y tiene mayor costo, se sobreescribe
+					if (hijoTurnL.costo < (*it).first){
 						hijoTurnL.secuencia.push_back(actTURN_L);
 						casilla = {hijoTurnL.costo, hijoTurnL};
 						abiertos.erase(it);
@@ -570,18 +570,12 @@ bool ComportamientoJugador::pathFinding_CostoUniforme(const estado & origen, con
 				}
 			}
 
-			// Si ya se ha abierto (es el mismo nodo) y tiene mayor costo, se sobreescribe
-
 			// Si no se ha abierto, se añade a la frontera
 			if (!encontrado){
 				hijoTurnL.secuencia.push_back(actTURN_L);
 				casilla = {hijoTurnL.costo, hijoTurnL};
 				abiertos.insert(casilla);
 			}
-
-			/*hijoTurnL.secuencia.push_back(actTURN_L);
-			casilla = {hijoTurnL.costo + 1, hijoTurnL};
-			abiertos.insert(casilla);*/
 		}
 
 		// Generar descendiente de avanzar
@@ -597,6 +591,7 @@ bool ComportamientoJugador::pathFinding_CostoUniforme(const estado & origen, con
 					if (hijoForward.st.fila == (*it).second.st.fila && hijoForward.st.columna == (*it).second.st.columna && hijoForward.st.orientacion == (*it).second.st.orientacion){
 						encontrado = true;
 
+						// Si ya se ha abierto (es el mismo nodo) y tiene mayor costo, se sobreescribe
 						if (hijoForward.costo < (*it).first){
 							hijoForward.secuencia.push_back(actFORWARD);
 							casilla = {hijoForward.costo, hijoForward};
@@ -606,8 +601,6 @@ bool ComportamientoJugador::pathFinding_CostoUniforme(const estado & origen, con
 
 					}
 				}
-
-				// Si ya se ha abierto (es el mismo nodo) y tiene mayor costo, se sobreescribe
 
 				if(!encontrado){
 					hijoForward.secuencia.push_back(actFORWARD);
