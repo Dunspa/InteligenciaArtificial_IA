@@ -31,5 +31,7 @@ El objetivo de esta práctica es dotar de un comportamiento inteligente al perso
    + Búsqueda en profundidad.
    + Búsqueda en anchura.
    + Búsqueda de costo uniforme.
+- **Nivel 2:** Agente reactivo/deliberativo complejo que no conoce nada del mapa ni sabe donde se encuentra. Además hay aldeanos, que se mueven por el mapa de forma aleatoria.  
+El agente creará un plan para llegar al objetivo, sin embargo hasta que no llegue a un punto de referencia PK no sabe donde está, por lo que en un principio realizará un comportamiento reactivo hasta llegar a un punto de referencia, a partir del cual seguirá el plan generado y rellenando el mapa, recalculando este plan en caso de encontrar obstáculos. Para crear el plan usa el algoritmo de búsqueda de costo uniforme.
 
 El programa se inicia mediante el ejecutable *Belkan* (siendo *BelkanSG* una versión que funciona solo por terminal sin interfaz gráfica). Entonces se debe elegir uno de los niveles descritos y el mapa en el que se resolverá el problema. Para elegir una meta dentro del mapa sólo hace falta hacer click sobre el lugar en el mapa, y presionar el botón de "ejecución" para que el personaje vaya hacia ese lugar.
