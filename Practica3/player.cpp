@@ -40,26 +40,33 @@ double ValoracionTest(const Environment &estado, int jugador){
     int ganador = estado.RevisarTablero();
 
     if (ganador==jugador)
-       return 99999999.0; // Gana el jugador que pide la valoracion
+      return 99999999.0; // Gana el jugador que pide la valoracion
     else if (ganador!=0)
-            return -99999999.0; // Pierde el jugador que pide la valoracion
+      return -99999999.0; // Pierde el jugador que pide la valoracion
     else if (estado.Get_Casillas_Libres()==0)
-            return 0;  // Hay un empate global y se ha rellenado completamente el tablero
+      return 0;  // Hay un empate global y se ha rellenado completamente el tablero
     else
-          return Puntuacion(jugador,estado);
+      return Puntuacion(jugador,estado);
 }
 
 // ------------------- Los tres metodos anteriores no se pueden modificar
-
-
 
 // Funcion heuristica
 double Valoracion(const Environment & estado, int jugador){
    // Valoración según el jugador que sea
    double valoracion = 0;
 
-   // Buscar siempre la heurística para MAX (valor mayor)
+   int ganador = estado.RevisarTablero();
 
+   if (ganador==jugador)
+      return 99999999.0; // Gana el jugador que pide la valoracion
+   else if (ganador!=0)
+      return -99999999.0; // Pierde el jugador que pide la valoracion
+   else if (estado.Get_Casillas_Libres() == 0)
+      return 0;  // Hay un empate global y se ha rellenado completamente el tablero
+   else
+      // Mi heuristica
+      return Puntuacion(jugador,estado);
 
    return valoracion;
 }
@@ -110,17 +117,16 @@ double Player::Poda_AlfaBeta(Environment & estado, int profundidad, double alfa,
       for (int i = 0 ; i < n_act ; i++){
          double valor_alfabeta = Poda_AlfaBeta(hijo[i], profundidad - 1, alfa, beta, jugador, accion);
 
-         // Si el valor de poda alfabeta es mayor que alfa, me quedo con la accion
+         // Si el valor de poda alfabeta es mayor que alfa
          if (valor_alfabeta > alfa){
             alfa = valor_alfabeta;
 
-            // Si estoy en el nodo raíz, compruebo si la acción a realizar es mejor que la que tenía
+            // Compruebo si estoy en el nodo raíz, y entonces actualizo la acción
+            // ya que la acción a realizar es mejor que la que tenía
             if (estado == actual_){
                accion = static_cast<Environment::ActionType>(hijo[i].Last_Action(jugador));
             }
          }
-
-
 
          // Criterio de poda beta
          if (alfa >= beta)
@@ -134,10 +140,8 @@ double Player::Poda_AlfaBeta(Environment & estado, int profundidad, double alfa,
       for (int i = 0 ; i < n_act ; i++){
          double valor_alfabeta = Poda_AlfaBeta(hijo[i], profundidad - 1, alfa, beta, jugador, accion);
 
-         // Si el valor de poda alfabeta es mayor que beta, me quedo con la accion
-         if (valor_alfabeta >= beta)
-            ;//accion = static_cast<Environment::ActionType>(hijo[i].Last_Action(jugador));
-         else
+         // Si el valor de poda alfabeta es mayor que beta
+         if (valor_alfabeta < beta)
             beta = valor_alfabeta;
 
          // Criterio de poda alfa
