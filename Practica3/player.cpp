@@ -93,47 +93,59 @@ double maximo(const int a, const int b){
 
 // Función que implementa el algoritmo de Poda Alfa-Beta
 // Devuelve la valoración del mejor estado encontrado
-double Poda_AlfaBeta(Environment & estado, int profundidad, int alfa, int beta, int jugador, Environment::ActionType & accion){
-   int n_opciones = 0;
-   bool poda = false;
-
+double Player::Poda_AlfaBeta(Environment & estado, int profundidad, double alfa, double beta, int jugador, Environment::ActionType & accion){
    // Generar todos los posibles hijos del estado actual
    Environment hijo[8];
    int n_act = estado.GenerateAllMoves(hijo);
 
-   if (estado.JuegoTerminado() || profundidad == 0)
+   // Caso base
+   if (estado.JuegoTerminado() || profundidad == 0){
       return ValoracionTest(estado, jugador);
+   }
 
-   switch (jugador){
-      // Si el jugador activo es el jugador 1 (MAX)
-      case 1:
-         // Para cada hijo de nodo
-         for (int i = 0 ; i < n_act && !poda ; i++){
-            accion = static_cast<Environment::ActionType>(hijo[i].Last_Action(jugador));
-            alfa = maximo(alfa, Poda_AlfaBeta(hijo[i], profundidad - 1, alfa, beta, 1, accion));
+   // Distinguir entre nodos MIN y nodos MAX con profundidad%2. Si es par es MAX, si no es MIN.
+   // Eso en vez de con jugador
+   if (profundidad % 2 == 0){
+      // Para cada hijo de nodo
+      for (int i = 0 ; i < n_act ; i++){
+         double valor_alfabeta = Poda_AlfaBeta(hijo[i], profundidad - 1, alfa, beta, jugador, accion);
 
-            // Criterio de poda beta
-            if (alfa >= beta)
-               poda = true;
+         // Si el valor de poda alfabeta es mayor que alfa, me quedo con la accion
+         if (valor_alfabeta > alfa){
+            alfa = valor_alfabeta;
+
+            // Si estoy en el nodo raíz, compruebo si la acción a realizar es mejor que la que tenía
+            if (estado == actual_){
+               accion = static_cast<Environment::ActionType>(hijo[i].Last_Action(jugador));
+            }
          }
 
-         return alfa;
-         break;
 
-      // Si el jugador activo es el jugador 2 (MIN)
-      case 2:
-         // Para cada hijo de nodo
-         for (int i = 0 ; i , n_act && !poda ; i++){
-            accion = static_cast<Environment::ActionType>(hijo[i].Last_Action(jugador));
-            beta = minimo(beta, Poda_AlfaBeta(hijo[i], profundidad - 1, alfa, beta, 2, accion));
 
-            // Criterio de poda alfa
-            if (beta <= alfa)
-               poda = true;
-         }
+         // Criterio de poda beta
+         if (alfa >= beta)
+            return beta;
+      }
 
-         return beta;
-         break;
+      return alfa;
+   }
+   else{
+      // Para cada hijo de nodo
+      for (int i = 0 ; i < n_act ; i++){
+         double valor_alfabeta = Poda_AlfaBeta(hijo[i], profundidad - 1, alfa, beta, jugador, accion);
+
+         // Si el valor de poda alfabeta es mayor que beta, me quedo con la accion
+         if (valor_alfabeta >= beta)
+            ;//accion = static_cast<Environment::ActionType>(hijo[i].Last_Action(jugador));
+         else
+            beta = valor_alfabeta;
+
+         // Criterio de poda alfa
+         if (alfa >= beta)
+            return alfa;
+      }
+
+      return beta;
    }
 }
 
@@ -154,7 +166,7 @@ Environment::ActionType Player::Think(){
                         // aplicables[7]==true si BOOM es aplicable
 
     double valor;       // Almacena el valor con el que se etiqueta el estado tras el proceso de busqueda.
-    double alfa, beta;  // Cotas de la poda AlfaBeta
+    double alfa = menosinf, beta = masinf;  // Cotas de la poda AlfaBeta
     int n_act;          // Acciones posibles en el estado actual
 
     // Obtengo las acciones aplicables al estado actual en "aplicables"
