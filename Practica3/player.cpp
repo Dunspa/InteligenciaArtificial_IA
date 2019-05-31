@@ -52,36 +52,195 @@ double ValoracionTest(const Environment &estado, int jugador){
 // ------------------- Los tres metodos anteriores no se pueden modificar
 
 // Funcion heuristica
-double Valoracion(const Environment & estado, int jugador){
-   // Valoración según el jugador que sea
+double HeuristicaDesconecta4Boom(const Environment & estado, int jugador){
    double valoracion = 0;
+   // Si en fila de bomba hay más de 2 fichas = explota
+   // Poner fichas rodeando a las azules, para que no tenga mas remedio que ponerlas ahi
 
-   int ganador = estado.RevisarTablero();
+   // Primero comprobar que no es desfavorable, si lo es = valor muy negativo (-999)
+   for (int i = 0 ; i < 7 ; i++){
+      for (int j = 0 ; j < 7 ; j++){
+         int propietario = estado.See_Casilla(i, j);
+         bool hayFicha = true;
+         int fil = i, col = j;
+         int numFichas = 0;
 
-   if (ganador==jugador)
-      return 99999999.0; // Gana el jugador que pide la valoracion
-   else if (ganador!=0)
-      return -99999999.0; // Pierde el jugador que pide la valoracion
-   else if (estado.Get_Casillas_Libres() == 0)
-      return 0;  // Hay un empate global y se ha rellenado completamente el tablero
-   else
-      // Mi heuristica
-      return Puntuacion(jugador,estado);
+         // Fila y columna con su valoración provisional al haber hueco
+         vector<pair<double, pair<int, int>>> valorHueco;
+
+         // Si es mi casilla
+         if (propietario == jugador){
+            // Comprobar horizontal
+            for (int k = 0 ; k < 4 && hayFicha ; i++){
+               if (estado.See_Casilla(fil, j) == jugador){
+                  fil++;
+                  numFichas++;
+               }
+               else{
+                  hayFicha = false;
+
+                  // Si es un hueco vacio, se guarda un valor provisional según
+                  // lo malo que sea. Por ejemplo, si poniendo ahí una ficha pierdo
+                  // entonces un valor muy negativo, si quedan dos fichas para perder
+                  // entonces un valor un poco menos malo, y así
+                  if (estado.See_Casilla(fil, j) == 0){
+                     pair<double, pair<int, int>> hueco;
+                     hueco.second.first = fil;
+                     hueco.second.second = j;
+
+                     switch (numFichas){
+                        case 1:
+                           hueco.first = -10;
+                           break;
+
+                        case 2:
+                           hueco.first = -50;
+                           break;
+
+                        case 3:
+                           hueco.first = -100;
+                           break;
+                     }
+
+                     valorHueco.push_back(hueco);
+                  }
+
+                  numFichas = 0;
+                  fil = i;
+               }
+
+               // En este estado se pierde la partida
+               if (numFichas == 4){
+                  return -999;
+               }
+            }
+
+            // Comprobar vertical
+            for (int k = 0 ; k < 4 && hayFicha ; i++){
+               if (estado.See_Casilla(i, col) == jugador){
+                  col--:
+                  numFichas++;
+               }
+               else{
+                  hayFicha = false;
+
+                  if (estado.See_Casilla(i, col) == 0){
+                     pair<double, pair<int, int>> hueco;
+                     hueco.second.first = i;
+                     hueco.second.second = col;
+
+                     switch (numFichas){
+                        case 1:
+                           hueco.first = -10;
+                           break;
+
+                        case 2:
+                           hueco.first = -50;
+                           break;
+
+                        case 3:
+                           hueco.first = -100;
+                           break;
+                     }
+
+                     valorHueco.push_back(hueco);
+                  }
+
+                  numFichas = 0;
+                  col = j;
+               }
+
+               // En este estado se pierde la partida
+               if (numFichas == 4){
+                  return -999;
+               }
+            }
+
+            // Comprobar diagonal creciente
+            for (int k = 0 ; k < 4 && hayFicha ; i++){
+               if (estado.See_Casilla(fil, j) == jugador){
+                  fil--;
+                  col++;
+                  numFichas++;
+               }
+               else{
+                  hayFicha = false;
+
+                  // Si es un hueco vacio, se guarda un valor provisional según
+                  // lo malo que sea. Por ejemplo, si poniendo ahí una ficha pierdo
+                  // entonces un valor muy negativo, si quedan dos fichas para perder
+                  // entonces un valor un poco menos malo, y así
+                  if (estado.See_Casilla(fil, j) == 0){
+                     pair<double, pair<int, int>> hueco;
+                     hueco.second.first = fil;
+                     hueco.second.second = j;
+
+                     switch (numFichas){
+                        case 1:
+                           hueco.first = -10;
+                           break;
+
+                        case 2:
+                           hueco.first = -50;
+                           break;
+
+                        case 3:
+                           hueco.first = -100;
+                           break;
+                     }
+
+                     valorHueco.push_back(hueco);
+                  }
+
+                  numFichas = 0;
+                  fil = i;
+                  col = j;
+               }
+
+               // En este estado se pierde la partida
+               if (numFichas == 4){
+                  return -999;
+               }
+            }
+
+            // Comprobar diagonal decreciente
+         }
+         // Si está vacía
+         else if (propietario == 0){
+            hayFicha = false;
+
+         }
+         // Si es del otro jugador
+         else{
+
+         }
+      }
+   }
+
+   // Cuantas mas fichas mias juntas = menos puntuacion
+
+   // Con Put_FichaBOOM_now comprobar si la proxima ficha es bomba, y si es asi,
+   // buscar una posicion favorable para ponerla (siempre explotar, valor muy alto 999)
+
+   // if exploto, comprobar todo el nuevo estado (por ejemplo, ver si explotando gano)
 
    return valoracion;
 }
 
-// Esta funcion no se puede usar en la version entregable
-// Aparece aqui solo para ILUSTRAR el comportamiento del juego
-// ESTO NO IMPLEMENTA NI MINIMAX, NI PODA ALFABETA
-void JuegoAleatorio(bool aplicables[], int opciones[], int &j){
-    j=0;
-    for (int i=0; i<8; i++){
-        if (aplicables[i]){
-           opciones[j]=i;
-           j++;
-        }
-    }
+// Versión de ValoracionTest que añade mi heurística
+// Comprueba ganar, perder, empate, o cualquier otra situación distinta
+double Valoracion(const Environment & estado, int jugador){
+   int ganador = estado.RevisarTablero();
+
+   if (ganador == jugador)
+      return 99999999.0;   // Gana el jugador que pide la valoracion
+   else if (ganador != 0)
+      return -99999999.0;  // Pierde el jugador que pide la valoracion
+   else if (estado.Get_Casillas_Libres() == 0)
+      return 0;   // Hay un empate global y se ha rellenado completamente el tablero
+   else
+      // Cualquier otra situación: mi heuristica
+      return HeuristicaDesconecta4Boom(estado, jugador);
 }
 
 double minimo(const int a, const int b){
