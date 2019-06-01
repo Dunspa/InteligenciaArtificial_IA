@@ -51,173 +51,298 @@ double ValoracionTest(const Environment &estado, int jugador){
 
 // ------------------- Los tres metodos anteriores no se pueden modificar
 
+// Funciones auxiliares
+double minimo(const double a, const double b){
+   if (a < b)
+      return a;
+   else
+      return b;
+}
+
+double maximo(const double a, const double b){
+   if (a > b)
+      return a;
+   else
+      return b;
+}
+
 // Funcion heuristica
 double HeuristicaDesconecta4Boom(const Environment & estado, int jugador){
+   const int FILAS = 7;
+   const int COLUMNAS = 7;
    double valoracion = 0;
+   int fichasJugador = 0, fichasOponente = 0;
+
    // Si en fila de bomba hay más de 2 fichas = explota
    // Poner fichas rodeando a las azules, para que no tenga mas remedio que ponerlas ahi
 
-   // Primero comprobar que no es desfavorable, si lo es = valor muy negativo (-999)
-   for (int i = 0 ; i < 7 ; i++){
-      for (int j = 0 ; j < 7 ; j++){
-         int propietario = estado.See_Casilla(i, j);
-         bool hayFicha = true;
-         int fil = i, col = j;
-         int numFichas = 0;
+   // Lo cerca que estoy de ganar - lo cerca que está el otro de ganar
+   // Cuantas mas fichas mias juntas = menos puntuacion
 
-         // Fila y columna con su valoración provisional al haber hueco
-         vector<pair<double, pair<int, int>>> valorHueco;
+   // Primero comprobar que no es desfavorable, si lo es = valor muy negativo (-999)
+   // Comprobar horizontal
+   for (int i = 0 ; i < FILAS ; i++){
+      fichasJugador = 0, fichasOponente = 0;
+
+      for (int j = 0 ; j < COLUMNAS ; j++){
+         int propietario = estado.See_Casilla(i, j);
 
          // Si es mi casilla
          if (propietario == jugador){
-            // Comprobar horizontal
-            for (int k = 0 ; k < 4 && hayFicha ; i++){
-               if (estado.See_Casilla(fil, j) == jugador){
-                  fil++;
-                  numFichas++;
-               }
-               else{
-                  hayFicha = false;
+            fichasJugador++;
 
-                  // Si es un hueco vacio, se guarda un valor provisional según
-                  // lo malo que sea. Por ejemplo, si poniendo ahí una ficha pierdo
-                  // entonces un valor muy negativo, si quedan dos fichas para perder
-                  // entonces un valor un poco menos malo, y así
-                  if (estado.See_Casilla(fil, j) == 0){
-                     pair<double, pair<int, int>> hueco;
-                     hueco.second.first = fil;
-                     hueco.second.second = j;
-
-                     switch (numFichas){
-                        case 1:
-                           hueco.first = -10;
-                           break;
-
-                        case 2:
-                           hueco.first = -50;
-                           break;
-
-                        case 3:
-                           hueco.first = -100;
-                           break;
-                     }
-
-                     valorHueco.push_back(hueco);
-                  }
-
-                  numFichas = 0;
-                  fil = i;
-               }
-
-               // En este estado se pierde la partida
-               if (numFichas == 4){
-                  return -999;
-               }
+            if (fichasJugador == 4){
+               return -99999;
             }
-
-            // Comprobar vertical
-            for (int k = 0 ; k < 4 && hayFicha ; i++){
-               if (estado.See_Casilla(i, col) == jugador){
-                  col--:
-                  numFichas++;
-               }
-               else{
-                  hayFicha = false;
-
-                  if (estado.See_Casilla(i, col) == 0){
-                     pair<double, pair<int, int>> hueco;
-                     hueco.second.first = i;
-                     hueco.second.second = col;
-
-                     switch (numFichas){
-                        case 1:
-                           hueco.first = -10;
-                           break;
-
-                        case 2:
-                           hueco.first = -50;
-                           break;
-
-                        case 3:
-                           hueco.first = -100;
-                           break;
-                     }
-
-                     valorHueco.push_back(hueco);
-                  }
-
-                  numFichas = 0;
-                  col = j;
-               }
-
-               // En este estado se pierde la partida
-               if (numFichas == 4){
-                  return -999;
-               }
-            }
-
-            // Comprobar diagonal creciente
-            for (int k = 0 ; k < 4 && hayFicha ; i++){
-               if (estado.See_Casilla(fil, j) == jugador){
-                  fil--;
-                  col++;
-                  numFichas++;
-               }
-               else{
-                  hayFicha = false;
-
-                  // Si es un hueco vacio, se guarda un valor provisional según
-                  // lo malo que sea. Por ejemplo, si poniendo ahí una ficha pierdo
-                  // entonces un valor muy negativo, si quedan dos fichas para perder
-                  // entonces un valor un poco menos malo, y así
-                  if (estado.See_Casilla(fil, j) == 0){
-                     pair<double, pair<int, int>> hueco;
-                     hueco.second.first = fil;
-                     hueco.second.second = j;
-
-                     switch (numFichas){
-                        case 1:
-                           hueco.first = -10;
-                           break;
-
-                        case 2:
-                           hueco.first = -50;
-                           break;
-
-                        case 3:
-                           hueco.first = -100;
-                           break;
-                     }
-
-                     valorHueco.push_back(hueco);
-                  }
-
-                  numFichas = 0;
-                  fil = i;
-                  col = j;
-               }
-
-               // En este estado se pierde la partida
-               if (numFichas == 4){
-                  return -999;
-               }
-            }
-
-            // Comprobar diagonal decreciente
          }
          // Si está vacía
          else if (propietario == 0){
-            hayFicha = false;
+            // Cuantas más fichas mias juntas, peor valoración
+            switch (fichasJugador){
+               case 1:
+                  valoracion += -10;
+                  break;
 
+               case 2:
+                  valoracion += -30;
+                  break;
+
+               case 3:
+                  valoracion += -50;
+                  break;
+            }
+
+            // Cuantas más fichas juntas tenga el oponente, mejor valoración
+            switch (fichasOponente){
+               case 1:
+                  valoracion += 10;
+                  break;
+
+               case 2:
+                  valoracion += 30;
+                  break;
+
+               case 3:
+                  valoracion += 50;
+                  break;
+            }
+
+            // Se reinician las fichas consecutivas
+            fichasOponente = 0;
+            fichasJugador = 0;
          }
          // Si es del otro jugador
          else{
+            fichasOponente++;
 
+            if (fichasOponente == 4){
+               return 99999;
+            }
          }
       }
    }
 
-   // Cuantas mas fichas mias juntas = menos puntuacion
+   // Comprobar vertical
+   for (int i = 0 ; i < FILAS ; i++){
+      fichasJugador = 0, fichasOponente = 0;
+
+      for (int j = 0 ; j < COLUMNAS ; j++){
+         int propietario = estado.See_Casilla(j, i);
+
+         // Si es mi casilla
+         if (propietario == jugador){
+            fichasJugador++;
+
+            if (fichasJugador == 4){
+               return -99999;
+            }
+         }
+         // Si está vacía
+         else if (propietario == 0){
+            // Cuantas más fichas mias juntas, peor valoración
+            switch (fichasJugador){
+               case 1:
+                  valoracion += -10;
+                  break;
+
+               case 2:
+                  valoracion += -20;
+                  break;
+
+               case 3:
+                  valoracion += -30;
+                  break;
+            }
+
+            // Cuantas más fichas juntas tenga el oponente, mejor valoración
+            switch (fichasOponente){
+               case 1:
+                  valoracion += 10;
+                  break;
+
+               case 2:
+                  valoracion += 20;
+                  break;
+
+               case 3:
+                  valoracion += 30;
+                  break;
+            }
+
+            // Se reinician las fichas consecutivas
+            fichasOponente = 0;
+            fichasJugador = 0;
+         }
+         // Si es del otro jugador
+         else{
+            fichasOponente++;
+
+            if (fichasOponente == 4){
+               return 99999;
+            }
+         }
+      }
+   }
+
+   // Comprobar diagonal creciente
+   for (int i = 1 ; i <= (FILAS + COLUMNAS - 1) ; i++){
+      fichasJugador = 0, fichasOponente = 0;
+
+      // Índice de la primera columna de la diagonal
+      // 0 para la diagonal superior, i - FILAS para la diagonal inferior
+      int primeraColumna = maximo(0, i - FILAS);
+
+      // Número de elementos que hay en esa diagonal
+      int elementosDiagonal = minimo(minimo(i, COLUMNAS - primeraColumna), FILAS);
+
+      for (int j = 0 ; j < elementosDiagonal ; j++){
+         int propietario = estado.See_Casilla(minimo(COLUMNAS, i) - j - 1, primeraColumna + j);
+
+         // Si es mi casilla
+         if (propietario == jugador){
+            fichasJugador++;
+
+            if (fichasJugador == 4){
+               return -99999;
+            }
+         }
+         // Si está vacía
+         else if (propietario == 0){
+            // Cuantas más fichas mias juntas, peor valoración
+            switch (fichasJugador){
+               case 1:
+                  valoracion += -10;
+                  break;
+
+               case 2:
+                  valoracion += -20;
+                  break;
+
+               case 3:
+                  valoracion += -30;
+                  break;
+            }
+
+            // Cuantas más fichas juntas tenga el oponente, mejor valoración
+            switch (fichasOponente){
+               case 1:
+                  valoracion += 10;
+                  break;
+
+               case 2:
+                  valoracion += 20;
+                  break;
+
+               case 3:
+                  valoracion += 30;
+                  break;
+            }
+
+            // Se reinician las fichas consecutivas
+            fichasOponente = 0;
+            fichasJugador = 0;
+         }
+         // Si es del otro jugador
+         else{
+            fichasOponente++;
+
+            if (fichasOponente == 4){
+               return 99999;
+            }
+         }
+      }
+   }
+
+   // Comprobar diagonal decreciente
+   for (int i = 1 ; i <= (FILAS + COLUMNAS - 1) ; i++){
+      fichasJugador = 0, fichasOponente = 0;
+
+      // Índice de la primera columna de la diagonal
+      // 0 para la diagonal superior, i - FILAS para la diagonal inferior
+      int primeraColumna = maximo(0, i - FILAS);
+
+      // Número de elementos que hay en esa diagonal
+      int elementosDiagonal = minimo(minimo(i, COLUMNAS - primeraColumna), FILAS);
+
+      for (int j = 0 ; j < elementosDiagonal ; j++){
+         int propietario = estado.See_Casilla(maximo(COLUMNAS, i) + j - i, primeraColumna + j);
+
+         // Si es mi casilla
+         if (propietario == jugador){
+            fichasJugador++;
+
+            if (fichasJugador == 4){
+               return -99999;
+            }
+         }
+         // Si está vacía
+         else if (propietario == 0){
+            // Cuantas más fichas mias juntas, peor valoración
+            switch (fichasJugador){
+               case 1:
+                  valoracion += -10;
+                  break;
+
+               case 2:
+                  valoracion += -20;
+                  break;
+
+               case 3:
+                  valoracion += -30;
+                  break;
+            }
+
+            // Cuantas más fichas juntas tenga el oponente, mejor valoración
+            switch (fichasOponente){
+               case 1:
+                  valoracion += 10;
+                  break;
+
+               case 2:
+                  valoracion += 20;
+                  break;
+
+               case 3:
+                  valoracion += 30;
+                  break;
+            }
+
+            // Se reinician las fichas consecutivas
+            fichasOponente = 0;
+            fichasJugador = 0;
+         }
+         // Si es del otro jugador
+         else{
+            fichasOponente++;
+
+            if (fichasOponente == 4){
+               return 99999;
+            }
+         }
+      }
+   }
+
+   // Si una columna está llena con muchas fichas mias, mayor prioridad (llenar hasta tope)
 
    // Con Put_FichaBOOM_now comprobar si la proxima ficha es bomba, y si es asi,
    // buscar una posicion favorable para ponerla (siempre explotar, valor muy alto 999)
@@ -243,20 +368,6 @@ double Valoracion(const Environment & estado, int jugador){
       return HeuristicaDesconecta4Boom(estado, jugador);
 }
 
-double minimo(const int a, const int b){
-   if (a < b)
-      return a;
-   else
-      return b;
-}
-
-double maximo(const int a, const int b){
-   if (a > b)
-      return a;
-   else
-      return b;
-}
-
 // Función que implementa el algoritmo de Poda Alfa-Beta
 // Devuelve la valoración del mejor estado encontrado
 double Player::Poda_AlfaBeta(Environment & estado, int profundidad, double alfa, double beta, int jugador, Environment::ActionType & accion){
@@ -266,11 +377,10 @@ double Player::Poda_AlfaBeta(Environment & estado, int profundidad, double alfa,
 
    // Caso base
    if (estado.JuegoTerminado() || profundidad == 0){
-      return ValoracionTest(estado, jugador);
+      return Valoracion(estado, jugador);
    }
 
    // Distinguir entre nodos MIN y nodos MAX con profundidad%2. Si es par es MAX, si no es MIN.
-   // Eso en vez de con jugador
    if (profundidad % 2 == 0){
       // Para cada hijo de nodo
       for (int i = 0 ; i < n_act ; i++){
