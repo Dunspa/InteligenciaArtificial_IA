@@ -499,6 +499,8 @@ double Player::Poda_AlfaBeta(Environment & estado, int profundidad, double alfa,
    Environment hijo[8];
    int n_act = estado.GenerateAllMoves(hijo);
 
+   const int PROFUNDIDAD = 8;
+
    // Caso base
    if (estado.JuegoTerminado() || profundidad == 0){
       return Valoracion(estado, jugador);
@@ -507,7 +509,7 @@ double Player::Poda_AlfaBeta(Environment & estado, int profundidad, double alfa,
    // Distinguir entre nodos MIN y nodos MAX con profundidad%2. Si es par es MAX, si no es MIN.
    if (profundidad % 2 == 0){
       // Para cada hijo de nodo
-      for (int i = 0 ; i < n_act ; i++){
+      for (int i = n_act - 1 ; i >= 0 ; i--){
          double valor_alfabeta = Poda_AlfaBeta(hijo[i], profundidad - 1, alfa, beta, jugador, accion);
 
          // Si el valor de poda alfabeta es mayor que alfa
@@ -516,7 +518,7 @@ double Player::Poda_AlfaBeta(Environment & estado, int profundidad, double alfa,
 
             // Compruebo si estoy en el nodo raíz, y entonces actualizo la acción
             // ya que la acción a realizar es mejor que la que tenía
-            if (estado == actual_){
+            if (profundidad == PROFUNDIDAD){ // if estado == actual_
                accion = static_cast<Environment::ActionType>(hijo[i].Last_Action(jugador));
             }
          }
@@ -590,7 +592,7 @@ Environment::ActionType Player::Think(){
       //accion = Environment::actIDLE;
     }
     else if (n_act==1){
-           (jugador_==1) ? cout << "Verde: " : cout << "Azul: ";
+           (jugador_==1) ? cout << "Vhttps://www.google.com/search?client=firefox-b-d&biw=1920&bih=917&tbm=isch&sa=1&ei=ewz0XPzuA--HjLsPj_CI0AU&q=lsi+ugr&oq=lsi+ugr&gs_l=img.3..0i24l2.122271.123108..123300...0.0..0.134.759.1j6......0....1..gws-wiz-img.......35i39j0i67j0j0i30j0i10i24.iOxen1GkSjU#imgrc=GzMts7DGDLSL8M:erde: " : cout << "Azul: ";
             cout << " Solo se puede realizar la accion "
                  << actual_.ActionStr( static_cast< Environment::ActionType > (opciones[0])  ) << endl;
             accion = static_cast< Environment::ActionType > (opciones[0]);
