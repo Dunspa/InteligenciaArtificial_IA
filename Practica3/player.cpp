@@ -73,8 +73,9 @@ double HeuristicaDesconecta4Boom(const Environment & estado, int jugador){
    double valoracion = 0;
    int fichasJugador = 0, fichasOponente = 0;
 
-   // Si en fila de bomba hay más de 2 fichas = explota
-   // Poner fichas rodeando a las azules, para que no tenga mas remedio que ponerlas ahi
+   if (estado.Have_BOOM(jugador)){
+      valoracion += 100;
+   }
 
    // Lo cerca que estoy de ganar - lo cerca que está el otro de ganar
    // Cuantas mas fichas mias juntas = menos puntuacion
@@ -91,25 +92,8 @@ double HeuristicaDesconecta4Boom(const Environment & estado, int jugador){
          if (propietario == jugador){
             fichasJugador++;
 
-            if (fichasJugador == 4){
-               return -99999;
-            }
-         }
-         // Si está vacía
-         else if (propietario == 0){
-            // Cuantas más fichas mias juntas, peor valoración
-            switch (fichasJugador){
-               case 1:
-                  valoracion += -10;
-                  break;
-
-               case 2:
-                  valoracion += -30;
-                  break;
-
-               case 3:
-                  valoracion += -50;
-                  break;
+            if (fichasJugador >= 4){
+               valoracion += -9999;
             }
 
             // Cuantas más fichas juntas tenga el oponente, mejor valoración
@@ -119,43 +103,14 @@ double HeuristicaDesconecta4Boom(const Environment & estado, int jugador){
                   break;
 
                case 2:
-                  valoracion += 30;
+                  valoracion += 20;
                   break;
 
                case 3:
-                  valoracion += 50;
+                  valoracion += 30;
                   break;
             }
-
-            // Se reinician las fichas consecutivas
             fichasOponente = 0;
-            fichasJugador = 0;
-         }
-         // Si es del otro jugador
-         else{
-            fichasOponente++;
-
-            if (fichasOponente == 4){
-               return 99999;
-            }
-         }
-      }
-   }
-
-   // Comprobar vertical
-   for (int i = 0 ; i < FILAS ; i++){
-      fichasJugador = 0, fichasOponente = 0;
-
-      for (int j = 0 ; j < COLUMNAS ; j++){
-         int propietario = estado.See_Casilla(j, i);
-
-         // Si es mi casilla
-         if (propietario == jugador){
-            fichasJugador++;
-
-            if (fichasJugador == 4){
-               return -99999;
-            }
          }
          // Si está vacía
          else if (propietario == 0){
@@ -197,9 +152,119 @@ double HeuristicaDesconecta4Boom(const Environment & estado, int jugador){
          else{
             fichasOponente++;
 
-            if (fichasOponente == 4){
-               return 99999;
+            if (fichasOponente >= 4){
+               valoracion += 9999;
             }
+
+            // Cuantas más fichas mias juntas, peor valoración
+            switch (fichasJugador){
+               case 1:
+                  valoracion += -10;
+                  break;
+
+               case 2:
+                  valoracion += -20;
+                  break;
+
+               case 3:
+                  valoracion += -30;
+                  break;
+            }
+            fichasJugador = 0;
+         }
+      }
+   }
+
+   // Comprobar vertical
+   for (int i = 0 ; i < FILAS ; i++){
+      fichasJugador = 0, fichasOponente = 0;
+
+      for (int j = 0 ; j < COLUMNAS ; j++){
+         int propietario = estado.See_Casilla(j, i);
+
+         // Si es mi casilla
+         if (propietario == jugador){
+            fichasJugador++;
+
+            if (fichasJugador >= 4){
+               valoracion += -9999;
+            }
+
+            // Cuantas más fichas juntas tenga el oponente, mejor valoración
+            switch (fichasOponente){
+               case 1:
+                  valoracion += 10;
+                  break;
+
+               case 2:
+                  valoracion += 20;
+                  break;
+
+               case 3:
+                  valoracion += 30;
+                  break;
+            }
+            fichasOponente = 0;
+         }
+         // Si está vacía
+         else if (propietario == 0){
+            // Cuantas más fichas mias juntas, peor valoración
+            switch (fichasJugador){
+               case 1:
+                  valoracion += -10;
+                  break;
+
+               case 2:
+                  valoracion += -20;
+                  break;
+
+               case 3:
+                  valoracion += -30;
+                  break;
+            }
+
+            // Cuantas más fichas juntas tenga el oponente, mejor valoración
+            switch (fichasOponente){
+               case 1:
+                  valoracion += 10;
+                  break;
+
+               case 2:
+                  valoracion += 20;
+                  break;
+
+               case 3:
+                  valoracion += 30;
+                  break;
+            }
+
+            // Se reinician las fichas consecutivas
+            fichasOponente = 0;
+            fichasJugador = 0;
+         }
+         // Si es del otro jugador
+         else{
+            fichasOponente++;
+
+            if (fichasOponente >= 4){
+               valoracion += 9999;
+            }
+
+            // Cuantas más fichas mias juntas, peor valoración
+            switch (fichasJugador){
+               case 1:
+                  valoracion += -10;
+                  break;
+
+               case 2:
+                  valoracion += -20;
+                  break;
+
+               case 3:
+                  valoracion += -30;
+                  break;
+            }
+            fichasJugador = 0;
          }
       }
    }
@@ -222,9 +287,25 @@ double HeuristicaDesconecta4Boom(const Environment & estado, int jugador){
          if (propietario == jugador){
             fichasJugador++;
 
-            if (fichasJugador == 4){
-               return -99999;
+            if (fichasJugador >= 4){
+               valoracion += -9999;
             }
+
+            // Cuantas más fichas juntas tenga el oponente, mejor valoración
+            switch (fichasOponente){
+               case 1:
+                  valoracion += 10;
+                  break;
+
+               case 2:
+                  valoracion += 20;
+                  break;
+
+               case 3:
+                  valoracion += 30;
+                  break;
+            }
+            fichasOponente = 0;
          }
          // Si está vacía
          else if (propietario == 0){
@@ -266,9 +347,25 @@ double HeuristicaDesconecta4Boom(const Environment & estado, int jugador){
          else{
             fichasOponente++;
 
-            if (fichasOponente == 4){
-               return 99999;
+            if (fichasOponente >= 4){
+               valoracion += 9999;
             }
+
+            // Cuantas más fichas mias juntas, peor valoración
+            switch (fichasJugador){
+               case 1:
+                  valoracion += -10;
+                  break;
+
+               case 2:
+                  valoracion += -20;
+                  break;
+
+               case 3:
+                  valoracion += -30;
+                  break;
+            }
+            fichasJugador = 0;
          }
       }
    }
@@ -291,9 +388,25 @@ double HeuristicaDesconecta4Boom(const Environment & estado, int jugador){
          if (propietario == jugador){
             fichasJugador++;
 
-            if (fichasJugador == 4){
-               return -99999;
+            if (fichasJugador >= 4){
+               valoracion += -9999;
             }
+
+            // Cuantas más fichas juntas tenga el oponente, mejor valoración
+            switch (fichasOponente){
+               case 1:
+                  valoracion += 10;
+                  break;
+
+               case 2:
+                  valoracion += 20;
+                  break;
+
+               case 3:
+                  valoracion += 30;
+                  break;
+            }
+            fichasOponente = 0;
          }
          // Si está vacía
          else if (propietario == 0){
@@ -335,19 +448,30 @@ double HeuristicaDesconecta4Boom(const Environment & estado, int jugador){
          else{
             fichasOponente++;
 
-            if (fichasOponente == 4){
-               return 99999;
+            if (fichasOponente >= 4){
+               valoracion += 9999;
             }
+
+            // Cuantas más fichas mias juntas, peor valoración
+            switch (fichasJugador){
+               case 1:
+                  valoracion += -10;
+                  break;
+
+               case 2:
+                  valoracion += -20;
+                  break;
+
+               case 3:
+                  valoracion += -30;
+                  break;
+            }
+            fichasJugador = 0;
          }
       }
    }
 
-   // Si una columna está llena con muchas fichas mias, mayor prioridad (llenar hasta tope)
-
-   // Con Put_FichaBOOM_now comprobar si la proxima ficha es bomba, y si es asi,
-   // buscar una posicion favorable para ponerla (siempre explotar, valor muy alto 999)
-
-   // if exploto, comprobar todo el nuevo estado (por ejemplo, ver si explotando gano)
+   // Comprobar caso de bomba con last action
 
    return valoracion;
 }
