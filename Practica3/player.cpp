@@ -80,7 +80,7 @@ double HeuristicaDesconecta4Boom(const Environment & estado, int jugador){
    // Lo cerca que estoy de ganar - lo cerca que está el otro de ganar
    // Cuantas mas fichas mias juntas = menos puntuacion
 
-   // Primero comprobar que no es desfavorable, si lo es = valor muy negativo (-999)
+   // Primero comprobar que no es desfavorable, si lo es = valor muy negativo (-9999)
    // Comprobar horizontal
    for (int i = 0 ; i < FILAS ; i++){
       fichasJugador = 0, fichasOponente = 0;
