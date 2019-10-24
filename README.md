@@ -35,3 +35,15 @@ El objetivo de esta práctica es dotar de un comportamiento inteligente al perso
 El agente creará un plan para llegar al objetivo, sin embargo hasta que no llegue a un punto de referencia PK no sabe donde está, por lo que en un principio realizará un comportamiento reactivo hasta llegar a un punto de referencia, a partir del cual seguirá el plan generado y rellenando el mapa, recalculando este plan en caso de encontrar obstáculos. Para crear el plan usa el algoritmo de búsqueda de costo uniforme.
 
 El programa se inicia mediante el ejecutable *Belkan* (siendo *BelkanSG* una versión que funciona solo por terminal sin interfaz gráfica). Entonces se debe elegir uno de los niveles descritos y el mapa en el que se resolverá el problema. Para elegir una meta dentro del mapa sólo hace falta hacer click sobre el lugar en el mapa, y presionar el botón de "ejecución" para que el personaje vaya hacia ese lugar.
+
+## Práctica 3: Métodos de Búsqueda con Adversario (Juegos [DesConecta-4 BOOM])
+
+DesConecta-4 BOOM es un juego derivado del clásico juego Conecta-4. Usaremos un entorno simulado, basado en el ejemplo de la aspiradora inteligente anteriormente visto en clase (del libro "Inteligencia Artificial: Un enfoque Moderno", Stuart Russell, Peter Norvig, y adaptado de la versión usada en la práctica anterior del profesor Tsung-Che Chiang), para representar el tablero del juego y los agentes que competirán con el objetivo de ganar.
+
+Es un juego bipersonal con información completa, jugado en un tablero de 7xx7 casillas, en el que los jugadores colocan fichas de forma alternativa. Las fichas se pueden colocar en una de las 7 columnas del tablero, colocándose por arriba y cayendo por gravedad hasta que toquen la primera fila del tablero o una ficha previamente colocada.
+
+La meta del juego es hacer que el adversario alinee 4 fichas en el tablero, ya sea de manera horizontal, vertical o diagonal. Para ello, cada jugador dispone de una ficha bomba, que sustituye a una ficha normal cada 5 movimientos. Si un jugador tiene una ficha bomba en el tablero, posee una acción más, BOOM, que consume el turno del jugador. Hacer BOOM elimina la ficha bomba y todas las fichas del mismo color en la misma fila. Los huecos generados por las fichas eliminadas son rellenados por las fichas que estaban en filas superiores, simulando una caída por gravedad.
+
+El objetivo de la práctica será implementar un MINIMAX (con profundidad máxima de 4) o una Poda ALFA-BETA (profundidad máxima de 8) para que, dado un estado de una partida de DESCONECTA-4 BOOM, se pueda determinar la acción a realizar que permite conseguir la victoria en el juego. También se deberá crear una heurística apropiada en conjunto con el algoritmo implementado.
+
+La nota de la práctica vendrá dada por la correcta implementación del algoritmo (que será enfrentado a tres jugadores "ninja" a los que tendrá que ganar) y la memoria de prácticas, que se deberá entregar junto al código.
